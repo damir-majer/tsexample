@@ -7,6 +7,20 @@ project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## v0.6.0 (2026-02-28)
+
+- **Tags**: `@Example({ tags: ['fast', 'setup'] })` — optional metadata tags on
+  examples. Included in reports and Markdown output. Tags column is
+  conditionally shown (omitted when no examples have tags).
+- **Execution timing**: `durationMs` on `ExampleResult`, `SuiteReportEntry`, and
+  `SuiteReportSummary`. Runner captures timing via `performance.now()`. Skipped
+  examples report 0ms.
+- **Markdown reports**: New `renderMarkdown(report)` pure function renders
+  `SuiteReport` as Markdown with summary line, example table, and Mermaid
+  dependency graph. Conditional Tags and Description columns.
+
+---
+
 ## v0.5.0 (2026-02-28)
 
 - **Example descriptions**: `@Example()` accepts an options object with optional

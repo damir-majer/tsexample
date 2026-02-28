@@ -101,14 +101,20 @@ export function renderMarkdown(report: SuiteReport): string {
   // Summary
   const { total, passed, failed, skipped, durationMs } = report.summary;
   lines.push(
-    `> ${total} examples: ${passed} passed, ${failed} failed, ${skipped} skipped (${formatMs(durationMs)})`,
+    `> ${total} examples: ${passed} passed, ${failed} failed, ${skipped} skipped (${
+      formatMs(durationMs)
+    })`,
   );
   lines.push('');
 
   // Table
   if (report.examples.length > 0) {
-    const hasTags = report.examples.some((e) => e.tags !== undefined && e.tags.length > 0);
-    const hasDescriptions = report.examples.some((e) => e.description !== undefined);
+    const hasTags = report.examples.some((e) =>
+      e.tags !== undefined && e.tags.length > 0
+    );
+    const hasDescriptions = report.examples.some((e) =>
+      e.description !== undefined
+    );
 
     // Header row
     const headers = ['#', 'Example', 'Status', 'Duration'];

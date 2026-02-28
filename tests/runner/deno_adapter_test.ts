@@ -134,12 +134,18 @@ Deno.test('formatStepName: works with empty name', () => {
 // ---------------------------------------------------------------------------
 
 Deno.test('resolveStepError: returns null for passed result', () => {
-  assertEquals(resolveStepError({ value: 42, status: 'passed', durationMs: 0 }, 'ex'), null);
+  assertEquals(
+    resolveStepError({ value: 42, status: 'passed', durationMs: 0 }, 'ex'),
+    null,
+  );
 });
 
 Deno.test('resolveStepError: returns null for skipped result', () => {
   assertEquals(
-    resolveStepError({ value: undefined, status: 'skipped', durationMs: 0 }, 'ex'),
+    resolveStepError(
+      { value: undefined, status: 'skipped', durationMs: 0 },
+      'ex',
+    ),
     null,
   );
 });

@@ -120,9 +120,7 @@ export function Example(
         ...(opts.description !== undefined
           ? { description: opts.description }
           : {}),
-        ...(opts.tags !== undefined
-          ? { tags: opts.tags }
-          : {}),
+        ...(opts.tags !== undefined ? { tags: opts.tags } : {}),
       };
 
       _globalRegistry.register(meta);

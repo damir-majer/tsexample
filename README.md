@@ -7,7 +7,7 @@ Inspired by [JExample](https://scg.unibe.ch/research/jexample) research from the
 University of Bern, TSExample brings declarative test dependency chains to the
 TypeScript ecosystem using Stage 3 decorators.
 
-**Status**: v0.5.0 (Explore)
+**Status**: v0.6.0 (Explore)
 
 > This is a personal project. Issues and PRs are not actively monitored.
 
@@ -141,7 +141,7 @@ that downstream consumers can depend on.
 
 - `nameOrOptions` — Optional. Either:
   - A `string` for a custom name (defaults to method name)
-  - An `ExampleOptions` object: `{ name?: string, description?: string }`
+  - An `ExampleOptions` object: `{ name?, description?, tags? }`
 - Place `@Example()` above `@Given()` when combining both.
 
 All of these work:
@@ -151,6 +151,7 @@ All of these work:
 @Example('custom')                             // name = 'custom'
 @Example({ description: 'Empty wallet' })      // name = method name, with description
 @Example({ name: 'x', description: '...' })   // both set
+@Example({ tags: ['setup', 'fast'] })          // with metadata tags
 ```
 
 #### `@Given(...producers: string[])`
@@ -228,20 +229,34 @@ const report = buildReport('MoneyExample', metadata, results);
 console.log(JSON.stringify(report, null, 2));
 ```
 
+#### `renderMarkdown(report: SuiteReport): string`
+
+Renders a `SuiteReport` as a Markdown document with a summary line, example
+table, and Mermaid dependency graph. Tags and Description columns are
+conditionally shown — omitted when no examples use them.
+
+```typescript
+import { buildReport, renderMarkdown } from '@damir-majer/tsexample';
+
+const report = buildReport('MoneyExample', metadata, results);
+const md = renderMarkdown(report);
+// "# MoneyExample\n\n**3** examples: **3** passed ...\n\n| Name | ..."
+```
+
 ### Types
 
-| Type                 | Description                                                    |
-| -------------------- | -------------------------------------------------------------- |
-| `ExampleMetadata`    | `{ name, method, given }` — metadata for a registered example  |
-| `ExampleResult`      | `{ value, status, error? }` — result after execution           |
-| `ExampleStatus`      | `'passed' \| 'failed' \| 'skipped'`                            |
-| `CloneStrategy`      | `'structured' \| ((value: unknown) => unknown)`                |
-| `DependencyEdge`     | `{ from, to }` — edge in the dependency graph                  |
-| `Cloneable<T>`       | `{ clone(): T }` — implement for prototype-preserving clones   |
-| `ExampleOptions`     | `{ name?, description? }` — options for `@Example()` decorator |
-| `SuiteReport`        | `{ suite, timestamp, summary, examples, graph }` — full report |
-| `SuiteReportEntry`   | `{ name, description?, status, given, error? }` — one example  |
-| `SuiteReportSummary` | `{ total, passed, failed, skipped }` — summary counts          |
+| Type                 | Description                                                                      |
+| -------------------- | -------------------------------------------------------------------------------- |
+| `ExampleMetadata`    | `{ name, method, given, tags? }` — metadata for a registered example             |
+| `ExampleResult`      | `{ value, status, error?, durationMs }` — result after execution                 |
+| `ExampleStatus`      | `'passed' \| 'failed' \| 'skipped'`                                              |
+| `CloneStrategy`      | `'structured' \| ((value: unknown) => unknown)`                                  |
+| `DependencyEdge`     | `{ from, to }` — edge in the dependency graph                                    |
+| `Cloneable<T>`       | `{ clone(): T }` — implement for prototype-preserving clones                     |
+| `ExampleOptions`     | `{ name?, description?, tags? }` — options for `@Example()` decorator            |
+| `SuiteReport`        | `{ suite, timestamp, summary, examples, graph }` — full report                   |
+| `SuiteReportEntry`   | `{ name, description?, tags?, status, given, error?, durationMs }` — one example |
+| `SuiteReportSummary` | `{ total, passed, failed, skipped, durationMs }` — summary counts                |
 
 ### Multi-Producer Arguments
 
@@ -302,7 +317,7 @@ src/
     registry.ts           # ExampleRegistry — in-memory store
     graph.ts              # buildGraph, topoSort, detectCycles, renderMermaid
     clone.ts              # cloneFixture, isClassInstance, isCloneable
-    report.ts             # buildReport — structured suite report builder
+    report.ts             # buildReport, renderMarkdown — structured suite reports
   runner/                 # Imperative Shell (runtime integration)
     decorators.ts         # @Example(), @Given() — Stage 3 decorators
     runner.ts             # ExampleRunner — orchestrates execution
@@ -320,7 +335,7 @@ shared.
 
 ---
 
-## Known Limitations (v0.5)
+## Known Limitations (v0.6)
 
 - **Single-class suites**: Dependencies cannot span across different suite
   classes.
@@ -332,9 +347,9 @@ shared.
 ## Development
 
 ```bash
-deno task test           # Run Deno tests (116 tests)
+deno task test           # Run Deno tests (138 tests)
 deno task test:vitest    # Run Vitest tests (13 tests)
-deno task test:all       # Run both Deno + Vitest tests
+deno task test:all       # Run both Deno + Vitest tests (151 total)
 deno task test:coverage  # Deno coverage report
 deno task check          # Type checking (entry-point mode)
 deno task lint           # Lint
@@ -361,4 +376,4 @@ MIT
 
 ---
 
-**Last Updated**: 2026-02-28 (v0.5.0)
+**Last Updated**: 2026-02-28 (v0.6.0)

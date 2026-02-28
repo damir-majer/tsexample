@@ -26,7 +26,12 @@ function passed(value: unknown = undefined, durationMs = 0): ExampleResult {
 }
 
 function failed(message: string, durationMs = 0): ExampleResult {
-  return { value: undefined, status: 'failed', error: new Error(message), durationMs };
+  return {
+    value: undefined,
+    status: 'failed',
+    error: new Error(message),
+    durationMs,
+  };
 }
 
 function skipped(): ExampleResult {
@@ -40,7 +45,13 @@ function skipped(): ExampleResult {
 Deno.test('buildReport: empty suite produces zero-count summary', () => {
   const report = buildReport('EmptySuite', [], []);
   assertEquals(report.suite, 'EmptySuite');
-  assertEquals(report.summary, { total: 0, passed: 0, failed: 0, skipped: 0, durationMs: 0 });
+  assertEquals(report.summary, {
+    total: 0,
+    passed: 0,
+    failed: 0,
+    skipped: 0,
+    durationMs: 0,
+  });
   assertEquals(report.examples, []);
   assertEquals(report.graph, 'graph TD\n');
   assertEquals(typeof report.timestamp, 'string');
@@ -51,7 +62,13 @@ Deno.test('buildReport: single passing example', () => {
   const results = [passed(42)];
   const report = buildReport('SingleSuite', examples, results);
 
-  assertEquals(report.summary, { total: 1, passed: 1, failed: 0, skipped: 0, durationMs: 0 });
+  assertEquals(report.summary, {
+    total: 1,
+    passed: 1,
+    failed: 0,
+    skipped: 0,
+    durationMs: 0,
+  });
   assertEquals(report.examples.length, 1);
   assertEquals(report.examples[0].name, 'root');
   assertEquals(report.examples[0].status, 'passed');
@@ -68,7 +85,13 @@ Deno.test('buildReport: mixed results compute correct summary', () => {
   const results = [passed(), failed('boom'), skipped()];
   const report = buildReport('MixedSuite', examples, results);
 
-  assertEquals(report.summary, { total: 3, passed: 1, failed: 1, skipped: 1, durationMs: 0 });
+  assertEquals(report.summary, {
+    total: 3,
+    passed: 1,
+    failed: 1,
+    skipped: 1,
+    durationMs: 0,
+  });
 });
 
 Deno.test('buildReport: failed example includes error message', () => {
@@ -170,7 +193,11 @@ Deno.test('buildReport: durationMs is included in report entries', () => {
 
 Deno.test('buildReport: summary durationMs is sum of all examples', () => {
   const examples = [meta('a'), meta('b'), meta('c')];
-  const results = [passed(undefined, 1.0), passed(undefined, 2.0), passed(undefined, 3.0)];
+  const results = [
+    passed(undefined, 1.0),
+    passed(undefined, 2.0),
+    passed(undefined, 3.0),
+  ];
   const report = buildReport('SumSuite', examples, results);
 
   assertEquals(report.summary.durationMs, 6.0);
@@ -201,7 +228,10 @@ Deno.test('renderMarkdown: summary line shows counts and total duration', () => 
   const report = buildReport('S', examples, results);
   const md = renderMarkdown(report);
 
-  assertEquals(md.includes('2 examples: 2 passed, 0 failed, 0 skipped (3.5ms)'), true);
+  assertEquals(
+    md.includes('2 examples: 2 passed, 0 failed, 0 skipped (3.5ms)'),
+    true,
+  );
 });
 
 Deno.test('renderMarkdown: table has correct columns without tags/descriptions', () => {
