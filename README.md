@@ -6,7 +6,7 @@ Inspired by [JExample](https://scg.unibe.ch/research/jexample) research from the
 University of Bern, TSExample brings declarative test dependency chains to the
 TypeScript ecosystem using Stage 3 decorators.
 
-**Status**: v0.2.0 (Explore)
+**Status**: v0.3.0 (Explore)
 
 ---
 
@@ -260,8 +260,8 @@ global state, async execution.
 ## Development
 
 ```bash
-deno task test           # Run all tests (91 tests)
-deno task test:coverage  # Coverage report (92.8% line, 86.9% branch)
+deno task test           # Run all tests (100 tests)
+deno task test:coverage  # Coverage report (94.9% line, 88.5% branch)
 deno task check          # Type checking
 deno task lint           # Lint
 deno task fmt            # Format
@@ -287,4 +287,4 @@ MIT
 
 ---
 
-**Last Updated**: 2026-02-28 (v0.2.0)
+**Last Updated**: 2026-02-28 (v0.3.0)
