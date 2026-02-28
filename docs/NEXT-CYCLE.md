@@ -1,92 +1,121 @@
-# Next Cycle — TSExample v0.2
+# Next Cycle — TSExample v0.3
 
 > **Prepared**: 2026-02-28 | **Status**: Ready to scope
 
 ---
 
+## What v0.2 Delivered
+
+All 4 slices shipped. Full JExample feature parity achieved:
+
+- `renderMermaid()` — dependency graph visualization
+- Producer validation — fail-fast for invalid `@Given` references
+- `Cloneable<T>` — clone protocol preserving `instanceof` and prototype methods
+- Multi-producer `@Given('a', 'b')` — was already working, tests confirmed
+
+**Current state**: 91 tests, 92.8% line / 86.9% branch coverage, 7 source files
+
+- 1 barrel, zero runtime dependencies.
+
+---
+
 ## What's Ready to Build
 
-### Slice 1 — Mermaid Dependency Graph Visualization
+### Slice 1 — JSR Publication
 
-**Effort**: 1 PEP cycle (~1 hour) **Value**: High documentation value, low
-implementation effort **Files**: `src/core/graph.ts` (add `renderMermaid()`),
-`tests/core/graph_test.ts`
+**Effort**: 1-2 PEP cycles | **Value**: High (discoverability, `deno add`) |
+**Risk**: Low (API is stable)
 
-```typescript
-// Expected API:
-renderMermaid(examples: ExampleMetadata[]): string
-// Returns: "graph TD\n  empty --> addDollars\n  addDollars --> convert\n"
-```
+Publish to JSR as `@damir-majer/tsexample` (or `@ase/tsexample`). Requires:
 
-### Slice 2 — Producer Validation at Registration Time
+- `deno.json` — add `name`, `version`, `exports` fields per JSR spec
+- Review public API surface for stability (6 exports + types is clean)
+- Ensure JSR does NOT support private packages (confirmed in research) — this
+  will be public. Evaluate if that's acceptable.
+- Run `deno publish --dry-run` to validate
+- Create JSR account if needed
 
-**Effort**: 1 PEP cycle (~1 hour) **Value**: Better error messages, fail-fast
-behavior **Files**: `src/runner/runner.ts` or `src/runner/deno-adapter.ts`
+### Slice 2 — Decision Records
 
-Currently `@Given('nonExistent')` fails at runtime during `topoSort`. Should be
-caught during `registerSuite()` with a clear message:
-`TSExample: Example "addDollars" depends on "nonExistent" which is not registered.`
+**Effort**: 1 PEP cycle | **Value**: Medium (maintainability, onboarding) |
+**Risk**: None
 
-### Slice 3 — Clone Protocol for Class Instances
+Create `docs/decisions/` files for key decisions deferred from Cycles 1-2:
 
-**Effort**: 2-3 PEP cycles (~3 hours) **Value**: Removes the biggest v0.1
-limitation **Files**: `src/core/clone.ts`, `src/core/types.ts`, new tests
+1. **DEC-001: Stage 3 decorator timing** — `addInitializer` fires at
+   construction, not definition. `registerSuite()` must `new` the class.
+2. **DEC-002: structuredClone limitation** — loses prototypes. Solved by
+   `Cloneable<T>` interface (not decorator, not registry map).
+3. **DEC-003: Single Deno.test per suite** — all examples as `t.step()`
+   children. Enables topological ordering control.
+4. **DEC-004: 3-priority clone dispatch** — custom > Cloneable >
+   structuredClone. Backward compatible, each level independently testable.
 
-Design options:
+### Slice 3 — deno-adapter.ts Unit Tests
 
-1. **`Cloneable` interface**: `{ clone(): this }` — user implements on their
-   fixture class
-2. **`@Cloneable` decorator**: Auto-generates a clone method using
-   `Object.create`
-   - property copy
-3. **Registry-based clone map**:
-   `registerClone(MyClass, (v) => new MyClass(v.x, v.y))`
+**Effort**: 1-2 PEP cycles | **Value**: Medium (coverage quality) | **Risk**:
+Medium (Deno.test mocking is awkward)
 
-Recommendation: Option 1 (simplest, most explicit, follows EDD philosophy).
+Current 40% branch coverage is the longest-standing tech debt. Options:
 
-### Slice 4 (Stretch) — Multi-Producer Arguments
+1. **Inject test context** — make `registerSuite()` accept a test function
+   parameter (default: `Deno.test`). Test with a mock.
+2. **Integration-only** — accept that the adapter is tested via integration and
+   focus unit tests on the runner instead.
+3. **Extract testable logic** — pull step-name formatting and skip-prefix logic
+   into pure helpers that can be tested directly.
 
-**Effort**: 2 PEP cycles **Value**: Enables diamond dependencies:
-`@Given('producerA', 'producerB')`
+Recommendation: Option 3 (extract pure helpers) — maintains FCIS, easy to test.
 
-Currently supported in types (`given: readonly string[]`) but the runner passes
-only the first producer's fixture. Should map N producers to N method arguments.
+### Slice 4 (Stretch) — Vitest Adapter Spike
+
+**Effort**: 2-3 PEP cycles | **Value**: High (audience expansion) | **Risk**:
+High (unknown Vitest plugin API complexity)
+
+Research Vitest's custom runner API (`vitest.config.ts` → `runner: '...'`).
+Build a minimal `vitest-adapter.ts` that bridges TSExample to Vitest's test
+runner. This is a spike — if the API is too complex, defer to v0.4.
 
 ---
 
 ## Blocked Items
 
-None. All v0.2 slices can start immediately.
+None. All v0.3 slices can start immediately.
 
 ---
 
 ## Known Rabbit Holes to Avoid
 
-- **Cross-file dependencies**: Tempting but requires a fundamentally different
-  registration model (file-level coordination). Defer to v0.3+.
-- **Vitest/Jest adapter**: Would need to understand those frameworks' plugin
-  APIs. Not worth the investment until TSExample's API stabilizes.
-- **JSR publication**: API should be stable before publishing. Wait for v0.3.
-- **Parallel execution**: Would break the sequential guarantee that makes
-  skip-on-failure work. Don't attempt.
+- **Cross-file dependencies**: Still requires a fundamentally different
+  registration model. Defer to v0.4+.
+- **Parallel execution**: Breaks the sequential guarantee. Don't attempt.
+- **Custom reporter**: Tempting but Deno's built-in reporter is sufficient.
+  Would only make sense after a Vitest adapter exists.
+- **Async producer dependencies**: Async `@Given` resolution would add
+  complexity to the runner's topo-sort execution loop. Not needed — `run()`
+  already awaits each example.
 
 ---
 
 ## Suggested 3X Progression
 
-v0.1 shipped at **Explore** (50% threshold, high autonomy). For v0.2:
+v0.1 and v0.2 shipped at **Explore** (50% threshold, high autonomy).
 
-- If Slices 1-2 only: Stay at **Explore**
-- If Slice 3 (clone protocol): Consider **Expand** (80% threshold, standard
-  rigor) — this changes a core API contract
+For v0.3:
+
+- If JSR publication (Slice 1): Move to **Expand** (80% threshold, standard
+  rigor) — publishing makes the API a public contract.
+- If only decision records + adapter tests (Slices 2-3): Stay at **Explore**.
+- If Vitest spike (Slice 4): Stay at **Explore** for the spike, then Expand if
+  it succeeds and becomes a maintained adapter.
 
 ---
 
 ## Tech Debt to Address
 
-| Item                                    | Severity   | Slice to Fix In                   |
-| --------------------------------------- | ---------- | --------------------------------- |
-| deno-adapter.ts 40% branch coverage     | Low        | Any slice (add unit tests)        |
-| graph.ts defensive dead code (line 148) | Trivial    | Slice 1 (during graph work)       |
-| Decision records missing                | Low        | Create during v0.2 SHAPE          |
-| `no-explicit-any` in decorators.ts (2x) | Acceptable | Only if TS improves Stage 3 types |
+| Item                                    | Severity   | Slice to Fix In           |
+| --------------------------------------- | ---------- | ------------------------- |
+| deno-adapter.ts 40% branch coverage     | Low        | Slice 3 (primary target)  |
+| Decision records missing (3 cycles!)    | Low        | Slice 2 (dedicated)       |
+| `no-explicit-any` in decorators.ts (2x) | Acceptable | Only if TS improves       |
+| README: no rendered Mermaid diagram     | Trivial    | Slice 1 (during JSR work) |
