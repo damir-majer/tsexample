@@ -511,3 +511,63 @@ Deno.test('run() uses a custom CloneStrategy function when provided', async () =
   assertEquals(cloneLog.length, 1);
   assertEquals(results[1].value, { cloned: true, original: { data: 'hello' } });
 });
+
+// ---------------------------------------------------------------------------
+// Execution timing — durationMs
+// ---------------------------------------------------------------------------
+
+Deno.test('run() returns durationMs >= 0 for passing examples', async () => {
+  const registry = makeRegistry(meta('timed', 'timed'));
+  const runner = new ExampleRunner(registry);
+
+  const suite = {
+    timed() {
+      return 42;
+    },
+  };
+
+  const results = await runner.run(suite);
+
+  assertEquals(results[0].status, 'passed');
+  assertEquals(typeof results[0].durationMs, 'number');
+  assertEquals(results[0].durationMs >= 0, true);
+});
+
+Deno.test('run() returns durationMs >= 0 for failing examples', async () => {
+  const registry = makeRegistry(meta('fail', 'fail'));
+  const runner = new ExampleRunner(registry);
+
+  const suite = {
+    fail() {
+      throw new Error('boom');
+    },
+  };
+
+  const results = await runner.run(suite);
+
+  assertEquals(results[0].status, 'failed');
+  assertEquals(typeof results[0].durationMs, 'number');
+  assertEquals(results[0].durationMs >= 0, true);
+});
+
+Deno.test('run() returns durationMs === 0 for skipped examples', async () => {
+  const registry = makeRegistry(
+    meta('bad', 'bad'),
+    meta('skip', 'skip', ['bad']),
+  );
+  const runner = new ExampleRunner(registry);
+
+  const suite = {
+    bad() {
+      throw new Error('broken');
+    },
+    skip() {
+      return 'should not run';
+    },
+  };
+
+  const results = await runner.run(suite);
+
+  assertEquals(results[1].status, 'skipped');
+  assertEquals(results[1].durationMs, 0);
+});
