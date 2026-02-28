@@ -21,21 +21,7 @@ All 4 slices shipped. Full JExample feature parity achieved:
 
 ## What's Ready to Build
 
-### Slice 1 — JSR Publication
-
-**Effort**: 1-2 PEP cycles | **Value**: High (discoverability, `deno add`) |
-**Risk**: Low (API is stable)
-
-Publish to JSR as `@damir-majer/tsexample` (or `@ase/tsexample`). Requires:
-
-- `deno.json` — add `name`, `version`, `exports` fields per JSR spec
-- Review public API surface for stability (6 exports + types is clean)
-- Ensure JSR does NOT support private packages (confirmed in research) — this
-  will be public. Evaluate if that's acceptable.
-- Run `deno publish --dry-run` to validate
-- Create JSR account if needed
-
-### Slice 2 — Decision Records
+### Slice 1 — Decision Records
 
 **Effort**: 1 PEP cycle | **Value**: Medium (maintainability, onboarding) |
 **Risk**: None
@@ -51,7 +37,7 @@ Create `docs/decisions/` files for key decisions deferred from Cycles 1-2:
 4. **DEC-004: 3-priority clone dispatch** — custom > Cloneable >
    structuredClone. Backward compatible, each level independently testable.
 
-### Slice 3 — deno-adapter.ts Unit Tests
+### Slice 2 — deno-adapter.ts Unit Tests
 
 **Effort**: 1-2 PEP cycles | **Value**: Medium (coverage quality) | **Risk**:
 Medium (Deno.test mocking is awkward)
@@ -67,7 +53,7 @@ Current 40% branch coverage is the longest-standing tech debt. Options:
 
 Recommendation: Option 3 (extract pure helpers) — maintains FCIS, easy to test.
 
-### Slice 4 (Stretch) — Vitest Adapter Spike
+### Slice 3 (Stretch) — Vitest Adapter Spike
 
 **Effort**: 2-3 PEP cycles | **Value**: High (audience expansion) | **Risk**:
 High (unknown Vitest plugin API complexity)
@@ -103,11 +89,14 @@ v0.1 and v0.2 shipped at **Explore** (50% threshold, high autonomy).
 
 For v0.3:
 
-- If JSR publication (Slice 1): Move to **Expand** (80% threshold, standard
-  rigor) — publishing makes the API a public contract.
-- If only decision records + adapter tests (Slices 2-3): Stay at **Explore**.
-- If Vitest spike (Slice 4): Stay at **Explore** for the spike, then Expand if
+- Decision records + adapter tests (Slices 1-2): Stay at **Explore** — internal
+  tool, no public contract.
+- If Vitest spike (Slice 3): Stay at **Explore** for the spike, then Expand if
   it succeeds and becomes a maintained adapter.
+
+**Note**: JSR publication was considered but removed — TSExample is a private
+library for personal use. JSR does not support private packages. Distribution
+via direct GitHub import or Deno workspace is sufficient.
 
 ---
 
@@ -115,7 +104,7 @@ For v0.3:
 
 | Item                                    | Severity   | Slice to Fix In           |
 | --------------------------------------- | ---------- | ------------------------- |
-| deno-adapter.ts 40% branch coverage     | Low        | Slice 3 (primary target)  |
-| Decision records missing (3 cycles!)    | Low        | Slice 2 (dedicated)       |
+| deno-adapter.ts 40% branch coverage     | Low        | Slice 2 (primary target)  |
+| Decision records missing (3 cycles!)    | Low        | Slice 1 (dedicated)       |
 | `no-explicit-any` in decorators.ts (2x) | Acceptable | Only if TS improves       |
-| README: no rendered Mermaid diagram     | Trivial    | Slice 1 (during JSR work) |
+| README: no rendered Mermaid diagram     | Trivial    | Any slice (quick add)     |
