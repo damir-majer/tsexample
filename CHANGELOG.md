@@ -7,6 +7,52 @@ project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.4.0] — 2026-02-28
+
+**Cycle 4 complete.** Vitest adapter graduation. The spike
+(`playground/vitest-adapter-spike/`) proved the core works on Node.js/Vitest —
+now the adapter lives in the TSExample repo with full test coverage and
+dual-barrel exports.
+
+### Added
+
+- **Vitest adapter** (`src/runner/vitest-adapter.ts`): Bridges TSExample to
+  Vitest's `describe/test/beforeAll`. Same `registerSuite()` API as the Deno
+  adapter, identical function signature.
+- **Vitest barrel** (`src/mod.vitest.ts`): Public API barrel that re-exports the
+  same API as `mod.ts` but swaps the Deno adapter for the Vitest adapter.
+- **Vitest test suite** (`tests/vitest/vitest_adapter.test.ts`): 13 tests across
+  4 suites:
+  - MoneySuite — basic producer-consumer chain (3 examples)
+  - DiamondSuite — diamond dependency pattern (4 examples)
+  - IsolationSuite — fixture cloning prevents mutation leaks (3 examples)
+  - BrokenChainSuite — skip-on-failure propagation (3 tests via direct runner)
+- **Decision record**: DEC-005 (dual-adapter barrels)
+- New tasks in `deno.json`: `test:vitest`, `test:all`
+- `package.json` with Vitest devDependency
+- `vitest.config.ts` scoped to `tests/vitest/`
+
+### Changed
+
+- `deno.json` `check` task: `src/**/*.ts` → `src/mod.ts` (entry-point mode,
+  naturally excludes vitest-specific files from Deno type-checker)
+- `deno.json`: Added `test.exclude`, `fmt.exclude`, `lint.exclude` for
+  `tests/vitest/` and `node_modules/`
+- README: Added Vitest section, updated architecture tree, removed "Deno only"
+  limitation
+
+### Metrics
+
+| Metric       | v0.3 | v0.4 | Delta |
+| ------------ | ---- | ---- | ----- |
+| Deno tests   | 100  | 100  | +0    |
+| Vitest tests | —    | 13   | +13   |
+| Total tests  | 100  | 113  | +13   |
+| Source files | 7+1  | 8+2  | +2    |
+| Adapters     | 1    | 2    | +1    |
+
+---
+
 ## [0.3.0] — 2026-02-28
 
 **Cycle 3 complete.** Housekeeping + hardening cycle. Decision records close 3
