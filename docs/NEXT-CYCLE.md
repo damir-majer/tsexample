@@ -1,110 +1,70 @@
-# Next Cycle — TSExample v0.3
+# Next Cycle — TSExample v0.4
 
-> **Prepared**: 2026-02-28 | **Status**: Ready to scope
-
----
-
-## What v0.2 Delivered
-
-All 4 slices shipped. Full JExample feature parity achieved:
-
-- `renderMermaid()` — dependency graph visualization
-- Producer validation — fail-fast for invalid `@Given` references
-- `Cloneable<T>` — clone protocol preserving `instanceof` and prototype methods
-- Multi-producer `@Given('a', 'b')` — was already working, tests confirmed
-
-**Current state**: 91 tests, 92.8% line / 86.9% branch coverage, 7 source files
-
-- 1 barrel, zero runtime dependencies.
+> **Prepared**: 2026-02-28 | **Status**: On hold — driven by usage needs
 
 ---
 
-## What's Ready to Build
+## What v0.3 Delivered
 
-### Slice 1 — Decision Records
+Housekeeping + hardening cycle. Two slices shipped:
 
-**Effort**: 1 PEP cycle | **Value**: Medium (maintainability, onboarding) |
-**Risk**: None
+- Decision records (DEC-001 through DEC-004) — closes 3-cycle documentation debt
+- deno-adapter.ts pure helper extraction — branch coverage 40% → 80%
 
-Create `docs/decisions/` files for key decisions deferred from Cycles 1-2:
+**Current state**: 100 tests, 94.9% line / 88.5% branch coverage, 7 source
+files + 1 barrel, zero runtime dependencies.
 
-1. **DEC-001: Stage 3 decorator timing** — `addInitializer` fires at
-   construction, not definition. `registerSuite()` must `new` the class.
-2. **DEC-002: structuredClone limitation** — loses prototypes. Solved by
-   `Cloneable<T>` interface (not decorator, not registry map).
-3. **DEC-003: Single Deno.test per suite** — all examples as `t.step()`
-   children. Enables topological ordering control.
-4. **DEC-004: 3-priority clone dispatch** — custom > Cloneable >
-   structuredClone. Backward compatible, each level independently testable.
+**Full JExample feature parity** achieved at v0.2. v0.3 completed all tech debt
+and documentation. The library is feature-complete for its intended private use.
 
-### Slice 2 — deno-adapter.ts Unit Tests
+---
 
-**Effort**: 1-2 PEP cycles | **Value**: Medium (coverage quality) | **Risk**:
-Medium (Deno.test mocking is awkward)
+## What Could Be Built (If Needed)
 
-Current 40% branch coverage is the longest-standing tech debt. Options:
-
-1. **Inject test context** — make `registerSuite()` accept a test function
-   parameter (default: `Deno.test`). Test with a mock.
-2. **Integration-only** — accept that the adapter is tested via integration and
-   focus unit tests on the runner instead.
-3. **Extract testable logic** — pull step-name formatting and skip-prefix logic
-   into pure helpers that can be tested directly.
-
-Recommendation: Option 3 (extract pure helpers) — maintains FCIS, easy to test.
-
-### Slice 3 (Stretch) — Vitest Adapter Spike
+### Vitest Adapter Spike
 
 **Effort**: 2-3 PEP cycles | **Value**: High (audience expansion) | **Risk**:
 High (unknown Vitest plugin API complexity)
 
 Research Vitest's custom runner API (`vitest.config.ts` → `runner: '...'`).
 Build a minimal `vitest-adapter.ts` that bridges TSExample to Vitest's test
-runner. This is a spike — if the API is too complex, defer to v0.4.
+runner. This is a spike — if the API is too complex, defer further.
 
----
+Deferred from v0.3 (stretch). Only pursue if TSExample is actually needed in a
+Node/Vitest project.
 
-## Blocked Items
+### Cross-File Dependencies
 
-None. All v0.3 slices can start immediately.
+**Effort**: 3-5 PEP cycles | **Value**: Medium | **Risk**: High
+
+The single-class limitation is the biggest architectural constraint. Would
+require a file-level coordination mechanism (shared registry, import-time
+registration). Only pursue if a concrete multi-file use case arises.
 
 ---
 
 ## Known Rabbit Holes to Avoid
 
-- **Cross-file dependencies**: Still requires a fundamentally different
-  registration model. Defer to v0.4+.
+- **JSR publication**: TSExample is a private library. JSR requires public.
 - **Parallel execution**: Breaks the sequential guarantee. Don't attempt.
-- **Custom reporter**: Tempting but Deno's built-in reporter is sufficient.
-  Would only make sense after a Vitest adapter exists.
-- **Async producer dependencies**: Async `@Given` resolution would add
-  complexity to the runner's topo-sort execution loop. Not needed — `run()`
-  already awaits each example.
+- **Custom reporter**: Deno's built-in reporter is sufficient.
+- **Async producer dependencies**: Not needed — `run()` already awaits each
+  example.
 
 ---
 
-## Suggested 3X Progression
+## Remaining Tech Debt
 
-v0.1 and v0.2 shipped at **Explore** (50% threshold, high autonomy).
-
-For v0.3:
-
-- Decision records + adapter tests (Slices 1-2): Stay at **Explore** — internal
-  tool, no public contract.
-- If Vitest spike (Slice 3): Stay at **Explore** for the spike, then Expand if
-  it succeeds and becomes a maintained adapter.
-
-**Note**: JSR publication was considered but removed — TSExample is a private
-library for personal use. JSR does not support private packages. Distribution
-via direct GitHub import or Deno workspace is sufficient.
+| Item                                    | Severity   | Note                              |
+| --------------------------------------- | ---------- | --------------------------------- |
+| `no-explicit-any` in decorators.ts (2x) | Acceptable | Only if TS improves Stage 3 types |
+| README: no rendered Mermaid diagram     | Trivial    | Nice-to-have, not blocking        |
+| deno-adapter.ts 20% uncovered branches  | Acceptable | Irreducible imperative shell      |
 
 ---
 
-## Tech Debt to Address
+## Project Status
 
-| Item                                    | Severity   | Slice to Fix In          |
-| --------------------------------------- | ---------- | ------------------------ |
-| deno-adapter.ts 40% branch coverage     | Low        | Slice 2 (primary target) |
-| Decision records missing (3 cycles!)    | Low        | Slice 1 (dedicated)      |
-| `no-explicit-any` in decorators.ts (2x) | Acceptable | Only if TS improves      |
-| README: no rendered Mermaid diagram     | Trivial    | Any slice (quick add)    |
+Three cycles completed. All objectives met (21/21 cumulative SMART). The library
+is feature-complete for private use. Future work should be **demand-driven** —
+build only what actual usage requires.
