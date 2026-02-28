@@ -17,11 +17,12 @@ example linking, making test suites more readable and maintainable.
 
 ## Tech Stack
 
-- **Runtime**: Deno 2.x
+- **Runtime**: Deno 2.x (primary), Node.js/Vitest (secondary)
 - **Language**: TypeScript 5.x
-- **Testing**: `Deno.test()` (native, no external frameworks)
-- **Decorators**: Stage 3 (experimental decorators, when standardized)
-- **Package Management**: None (pure Deno, no npm/Node.js dependencies)
+- **Testing**: `Deno.test()` (native) + Vitest (Node.js adapter)
+- **Decorators**: Stage 3 (Deno native + esbuild via Vitest)
+- **Package Management**: None for Deno; minimal `package.json` for Vitest
+  (`vitest` devDependency only)
 - **Version Control**: Git (GitHub, private)
 
 ---
@@ -41,10 +42,17 @@ The project separates concerns across two zones:
 
 **Imperative Shell** (`src/runner/`):
 
-- Deno.test() integration
+- Deno.test() integration (deno-adapter.ts)
+- Vitest describe/test/beforeAll integration (vitest-adapter.ts)
 - Decorator registration
 - Example collection and execution
 - I/O and test framework bridging
+
+**Dual Barrels**:
+
+- `src/mod.ts` — Deno barrel (imports deno-adapter)
+- `src/mod.vitest.ts` — Vitest barrel (imports vitest-adapter)
+- Same public API, different adapter. See DEC-005.
 
 ### Design Principles
 
@@ -88,8 +96,10 @@ configuration:
 All gates must pass before advancing phases:
 
 ```bash
-deno task test           # All tests pass
-deno task check          # Type checking clean
+deno task test           # Deno tests pass (100)
+deno task test:vitest    # Vitest tests pass (13)
+deno task test:all       # Both Deno + Vitest
+deno task check          # Type checking clean (entry-point mode: src/mod.ts)
 deno task lint           # Lint clean
 deno task fmt:check      # Formatting clean
 deno task test:coverage  # 50%+ coverage (Explore level)
@@ -113,13 +123,15 @@ tsexample/
 │   │   ├── example.ts         # Example model & graph
 │   │   ├── result.ts          # Test result model
 │   │   └── scoring.ts         # Analysis functions
-│   └── runner/                # Imperative Shell (Deno integration)
+│   └── runner/                # Imperative Shell (runtime integration)
 │       ├── decorators.ts      # @Example() decorator implementation
-│       └── integration.ts     # Deno.test() integration
+│       ├── deno-adapter.ts    # Deno.test() integration
+│       └── vitest-adapter.ts  # Vitest describe/test integration
 ├── tests/                     # Test suite
 │   ├── core/
 │   ├── runner/
-│   └── integration/
+│   ├── integration/
+│   └── vitest/                # Vitest-specific tests (excluded from deno test)
 ├── docs/
 │   ├── pitches/               # SHAPE phase outputs
 │   │   └── archive/           # Old pitches

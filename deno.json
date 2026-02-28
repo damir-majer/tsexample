@@ -2,7 +2,9 @@
   "tasks": {
     "test": "deno test --allow-read --allow-env",
     "test:coverage": "deno test --allow-read --allow-env --coverage=coverage",
-    "check": "deno check src/**/*.ts",
+    "test:vitest": "npx vitest run",
+    "test:all": "deno task test && deno task test:vitest",
+    "check": "deno check src/mod.ts",
     "fmt": "deno fmt",
     "fmt:check": "deno fmt --check",
     "lint": "deno lint"
@@ -11,13 +13,18 @@
     "strict": true,
     "experimentalDecorators": false
   },
+  "test": {
+    "exclude": ["tests/vitest/"]
+  },
   "fmt": {
     "indentWidth": 2,
-    "singleQuote": true
+    "singleQuote": true,
+    "exclude": ["node_modules/"]
   },
   "lint": {
     "rules": {
       "tags": ["recommended"]
-    }
+    },
+    "exclude": ["node_modules/"]
   }
 }

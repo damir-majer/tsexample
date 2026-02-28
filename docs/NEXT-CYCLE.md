@@ -1,37 +1,32 @@
-# Next Cycle — TSExample v0.4
+# Next Cycle — TSExample v0.5
 
 > **Prepared**: 2026-02-28 | **Status**: On hold — driven by usage needs
 
 ---
 
-## What v0.3 Delivered
+## What v0.4 Delivered
 
-Housekeeping + hardening cycle. Two slices shipped:
+Vitest adapter graduation. The spike (`playground/vitest-adapter-spike/`) was
+validated and graduated into the main repo:
 
-- Decision records (DEC-001 through DEC-004) — closes 3-cycle documentation debt
-- deno-adapter.ts pure helper extraction — branch coverage 40% → 80%
+- `vitest-adapter.ts` — bridges `registerSuite()` to Vitest's
+  `describe/test/beforeAll`
+- `mod.vitest.ts` — Vitest barrel (same API as `mod.ts`, different adapter)
+- 13 Vitest tests across 4 suites (MoneySuite, DiamondSuite, IsolationSuite,
+  BrokenChainSuite)
+- DEC-005: Dual-adapter barrels decision record
+- Entry-point type checking (`deno check src/mod.ts`) to exclude vitest files
 
-**Current state**: 100 tests, 94.9% line / 88.5% branch coverage, 7 source
-files + 1 barrel, zero runtime dependencies.
+**Current state**: 100 Deno tests + 13 Vitest tests = 113 total, 8 source
+files + 2 barrels, 2 adapters (Deno + Vitest), zero runtime dependencies.
 
-**Full JExample feature parity** achieved at v0.2. v0.3 completed all tech debt
-and documentation. The library is feature-complete for its intended private use.
+**Full JExample feature parity** achieved at v0.2. v0.3 completed all tech debt.
+v0.4 added Node.js/Vitest support. The library supports both major TypeScript
+runtimes.
 
 ---
 
 ## What Could Be Built (If Needed)
-
-### Vitest Adapter Spike
-
-**Effort**: 2-3 PEP cycles | **Value**: High (audience expansion) | **Risk**:
-High (unknown Vitest plugin API complexity)
-
-Research Vitest's custom runner API (`vitest.config.ts` → `runner: '...'`).
-Build a minimal `vitest-adapter.ts` that bridges TSExample to Vitest's test
-runner. This is a spike — if the API is too complex, defer further.
-
-Deferred from v0.3 (stretch). Only pursue if TSExample is actually needed in a
-Node/Vitest project.
 
 ### Cross-File Dependencies
 
@@ -40,6 +35,13 @@ Node/Vitest project.
 The single-class limitation is the biggest architectural constraint. Would
 require a file-level coordination mechanism (shared registry, import-time
 registration). Only pursue if a concrete multi-file use case arises.
+
+### Jest Adapter
+
+**Effort**: 1-2 PEP cycles | **Value**: Low | **Risk**: Low
+
+Same pattern as vitest-adapter.ts. Jest uses `describe/test/beforeAll` with
+nearly identical semantics. Only pursue if a Jest project needs TSExample.
 
 ---
 
@@ -50,6 +52,7 @@ registration). Only pursue if a concrete multi-file use case arises.
 - **Custom reporter**: Deno's built-in reporter is sufficient.
 - **Async producer dependencies**: Not needed — `run()` already awaits each
   example.
+- **npm publication**: Private library, no external consumers.
 
 ---
 
@@ -65,6 +68,6 @@ registration). Only pursue if a concrete multi-file use case arises.
 
 ## Project Status
 
-Three cycles completed. All objectives met (21/21 cumulative SMART). The library
-is feature-complete for private use. Future work should be **demand-driven** —
-build only what actual usage requires.
+Four cycles completed. All objectives met. The library supports both Deno and
+Node.js/Vitest runtimes. Future work should be **demand-driven** — build only
+what actual usage requires.

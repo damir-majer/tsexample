@@ -1,12 +1,13 @@
 # TSExample
 
-Example-Driven Development (EDD) framework for TypeScript/Deno.
+Example-Driven Development (EDD) framework for TypeScript. Supports both Deno
+and Node.js/Vitest.
 
 Inspired by [JExample](https://scg.unibe.ch/research/jexample) research from the
 University of Bern, TSExample brings declarative test dependency chains to the
 TypeScript ecosystem using Stage 3 decorators.
 
-**Status**: v0.3.0 (Explore)
+**Status**: v0.4.0 (Explore)
 
 ---
 
@@ -77,7 +78,7 @@ class MoneyExample {
 registerSuite(MoneyExample);
 ```
 
-### 2. Run
+### 2. Run (Deno)
 
 ```bash
 deno test --allow-read --allow-env
@@ -92,6 +93,38 @@ MoneyExample ...
   convert ... ok (0ms)
 MoneyExample ... ok (1ms)
 ```
+
+### Using with Vitest
+
+TSExample also works with Vitest on Node.js. Import from `mod.vitest.ts` instead
+of `mod.ts`:
+
+```typescript
+import { Example, Given, registerSuite } from '../../src/mod.vitest.ts';
+
+class MoneyExample {
+  @Example()
+  empty(): Money {
+    const money: Money = { amount: 0, currency: 'CHF' };
+    return money;
+  }
+
+  @Example()
+  @Given('empty')
+  addDollars(money: Money): Money {
+    return { amount: money.amount + 10, currency: 'USD' };
+  }
+}
+
+registerSuite(MoneyExample);
+```
+
+```bash
+npx vitest run
+```
+
+The API is identical — only the import path differs. The Vitest adapter maps
+`registerSuite()` to `describe/test/beforeAll` instead of `Deno.test()`.
 
 ---
 
@@ -234,24 +267,27 @@ src/
     registry.ts           # ExampleRegistry — in-memory store
     graph.ts              # buildGraph, topoSort, detectCycles, renderMermaid
     clone.ts              # cloneFixture, isClassInstance, isCloneable
-  runner/                 # Imperative Shell (Deno integration)
+  runner/                 # Imperative Shell (runtime integration)
     decorators.ts         # @Example(), @Given() — Stage 3 decorators
     runner.ts             # ExampleRunner — orchestrates execution
     deno-adapter.ts       # registerSuite() — bridges to Deno.test()
-  mod.ts                  # Public API barrel
+    vitest-adapter.ts     # registerSuite() — bridges to Vitest describe/test
+  mod.ts                  # Public API barrel (Deno)
+  mod.vitest.ts           # Public API barrel (Vitest)
 ```
 
-**Core** is pure: no I/O, no side effects, testable without any Deno
-permissions. **Runner** owns all side effects: `Deno.test()` registration,
-global state, async execution.
+**Core** is pure: no I/O, no side effects, testable without any runtime
+permissions. **Runner** owns all side effects: test framework registration,
+global state, async execution. The two adapter files (`deno-adapter.ts`,
+`vitest-adapter.ts`) are the only runtime-specific code — everything else is
+shared.
 
 ---
 
-## Known Limitations (v0.2)
+## Known Limitations (v0.4)
 
 - **Single-class suites**: Dependencies cannot span across different suite
   classes.
-- **Deno only**: No Vitest, Jest, or Node.js adapter yet.
 - **Sequential execution**: Examples run sequentially in topological order (no
   parallel execution).
 
@@ -260,9 +296,11 @@ global state, async execution.
 ## Development
 
 ```bash
-deno task test           # Run all tests (100 tests)
-deno task test:coverage  # Coverage report (94.9% line, 88.5% branch)
-deno task check          # Type checking
+deno task test           # Run Deno tests (100 tests)
+deno task test:vitest    # Run Vitest tests (13 tests)
+deno task test:all       # Run both Deno + Vitest tests
+deno task test:coverage  # Deno coverage report
+deno task check          # Type checking (entry-point mode)
 deno task lint           # Lint
 deno task fmt            # Format
 ```
@@ -287,4 +325,4 @@ MIT
 
 ---
 
-**Last Updated**: 2026-02-28 (v0.3.0)
+**Last Updated**: 2026-02-28 (v0.4.0)
