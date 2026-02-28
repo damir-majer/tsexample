@@ -2,7 +2,8 @@
 
 All notable changes to the TSExample project are documented here.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
+The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
+project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
@@ -28,7 +29,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## Vision
 
-TSExample is an Example-Driven Development framework for TypeScript/Deno, inspired by JExample research from the University of Bern. The goal is to enable declarative test organization using decorators and example linking, making test suites more readable and maintainable for Deno developers.
+TSExample is an Example-Driven Development framework for TypeScript/Deno,
+inspired by JExample research from the University of Bern. The goal is to enable
+declarative test organization using decorators and example linking, making test
+suites more readable and maintainable for Deno developers.
 
 ---
 

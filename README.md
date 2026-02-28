@@ -8,11 +8,16 @@ Example-Driven Development framework for TypeScript/Deno.
 
 ## Overview
 
-TSExample is inspired by [JExample](https://jexample.ch/) research from the University of Bern. It brings example-driven development patterns to TypeScript/Deno, allowing you to organize test suites declaratively using decorators and example linking.
+TSExample is inspired by [JExample](https://jexample.ch/) research from the
+University of Bern. It brings example-driven development patterns to
+TypeScript/Deno, allowing you to organize test suites declaratively using
+decorators and example linking.
 
 ### Why Example-Driven Development?
 
-Traditional unit tests are often isolated and repetitive. EDD reduces boilerplate by allowing tests to inherit setup and fixtures from "example" tests, creating a readable chain of related examples.
+Traditional unit tests are often isolated and repetitive. EDD reduces
+boilerplate by allowing tests to inherit setup and fixtures from "example"
+tests, creating a readable chain of related examples.
 
 ---
 
@@ -50,8 +55,10 @@ deno task fmt                 # Format code
 
 TSExample follows the **FCIS pattern** (Functional Core, Imperative Shell):
 
-- **Functional Core** (`src/core/`): Pure functions for example graph construction and analysis
-- **Imperative Shell** (`src/runner/`): Deno.test() integration and decorator implementation
+- **Functional Core** (`src/core/`): Pure functions for example graph
+  construction and analysis
+- **Imperative Shell** (`src/runner/`): Deno.test() integration and decorator
+  implementation
 
 ---
 
@@ -86,7 +93,8 @@ MIT (or Apache 2.0 — to be confirmed)
 
 ## Contributing
 
-Contributions welcome! Please follow the ASE AI Development Workflow as documented in [CLAUDE.md](./CLAUDE.md).
+Contributions welcome! Please follow the ASE AI Development Workflow as
+documented in [CLAUDE.md](./CLAUDE.md).
 
 ---
 
