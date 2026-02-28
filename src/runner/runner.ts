@@ -44,6 +44,18 @@ export class ExampleRunner {
 
     if (examples.length === 0) return [];
 
+    // Guard: validate that all given references resolve to registered examples.
+    const registeredNames = new Set(examples.map((ex) => ex.name));
+    for (const ex of examples) {
+      for (const producerName of ex.given) {
+        if (!registeredNames.has(producerName)) {
+          throw new Error(
+            `TSExample: Example "${ex.name}" depends on "${producerName}" which is not registered.`,
+          );
+        }
+      }
+    }
+
     // Guard: detect cycles before touching any results.
     const cycle = detectCycles(examples);
     if (cycle !== null) {

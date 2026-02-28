@@ -6,7 +6,7 @@ Inspired by [JExample](https://scg.unibe.ch/research/jexample) research from the
 University of Bern, TSExample brings declarative test dependency chains to the
 TypeScript ecosystem using Stage 3 decorators.
 
-**Status**: v0.1.0 (Explore)
+**Status**: v0.2.0 (Explore)
 
 ---
 
@@ -124,6 +124,46 @@ sub-steps for each example in topological (dependency) order.
 - `SuiteClass` — A class whose methods are decorated with `@Example` / `@Given`.
 - `options.cloneStrategy` — Custom clone function. Default: `structuredClone`.
 
+### Interfaces
+
+#### `Cloneable<T>`
+
+Implement this interface on fixture classes to preserve prototype chains through
+the EDD dependency chain. Without it, `structuredClone` strips prototypes.
+
+```typescript
+import type { Cloneable } from './src/mod.ts';
+
+class Money implements Cloneable<Money> {
+  constructor(public amount: number, public currency: string) {}
+
+  add(n: number): Money {
+    return new Money(this.amount + n, this.currency);
+  }
+
+  clone(): Money {
+    return new Money(this.amount, this.currency);
+  }
+}
+```
+
+When a fixture implements `Cloneable`, TSExample calls `clone()` instead of
+`structuredClone`, preserving `instanceof` and prototype methods.
+
+### Utilities
+
+#### `renderMermaid(examples: ExampleMetadata[]): string`
+
+Generates a Mermaid `graph TD` diagram from example metadata. Useful for
+visualizing dependency chains in documentation.
+
+```typescript
+import { ExampleRegistry, renderMermaid } from './src/mod.ts';
+
+const diagram = renderMermaid(registry.all());
+// "graph TD\n  empty --> addDollars\n  addDollars --> convert\n"
+```
+
 ### Types
 
 | Type              | Description                                                   |
@@ -133,6 +173,39 @@ sub-steps for each example in topological (dependency) order.
 | `ExampleStatus`   | `'passed' \| 'failed' \| 'skipped'`                           |
 | `CloneStrategy`   | `'structured' \| ((value: unknown) => unknown)`               |
 | `DependencyEdge`  | `{ from, to }` — edge in the dependency graph                 |
+| `Cloneable<T>`    | `{ clone(): T }` — implement for prototype-preserving clones  |
+
+### Multi-Producer Arguments
+
+An example can depend on multiple producers. Each producer's fixture is passed
+as a separate argument, in the order declared in `@Given()`:
+
+```typescript
+class VectorExample {
+  @Example()
+  origin(): Vec2 {
+    return { x: 0, y: 0 };
+  }
+
+  @Example()
+  @Given('origin')
+  moveRight(v: Vec2): Vec2 {
+    return { x: v.x + 10, y: v.y };
+  }
+
+  @Example()
+  @Given('origin')
+  moveUp(v: Vec2): Vec2 {
+    return { x: v.x, y: v.y + 5 };
+  }
+
+  @Example()
+  @Given('moveRight', 'moveUp')
+  addVectors(right: Vec2, up: Vec2): Vec2 {
+    return { x: right.x + up.x, y: right.y + up.y };
+  }
+}
+```
 
 ### Advanced: Programmatic API
 
@@ -157,10 +230,10 @@ TSExample follows the **FCIS pattern** (Functional Core, Imperative Shell):
 ```
 src/
   core/                   # Functional Core (pure, no I/O)
-    types.ts              # ExampleMetadata, ExampleResult, CloneStrategy
+    types.ts              # ExampleMetadata, ExampleResult, CloneStrategy, Cloneable
     registry.ts           # ExampleRegistry — in-memory store
-    graph.ts              # buildGraph, topoSort, detectCycles
-    clone.ts              # cloneFixture, isClassInstance
+    graph.ts              # buildGraph, topoSort, detectCycles, renderMermaid
+    clone.ts              # cloneFixture, isClassInstance, isCloneable
   runner/                 # Imperative Shell (Deno integration)
     decorators.ts         # @Example(), @Given() — Stage 3 decorators
     runner.ts             # ExampleRunner — orchestrates execution
@@ -174,14 +247,11 @@ global state, async execution.
 
 ---
 
-## Known Limitations (v0.1)
+## Known Limitations (v0.2)
 
-- **Plain data fixtures only**: `structuredClone` does not preserve prototype
-  chains. Use interfaces/plain objects for fixtures, not class instances with
-  methods. A `clone()` protocol for class instances is planned for v0.2.
 - **Single-class suites**: Dependencies cannot span across different suite
   classes.
-- **Deno only**: No Vitest, Jest, or Node.js adapter in v0.1.
+- **Deno only**: No Vitest, Jest, or Node.js adapter yet.
 - **Sequential execution**: Examples run sequentially in topological order (no
   parallel execution).
 
@@ -190,8 +260,8 @@ global state, async execution.
 ## Development
 
 ```bash
-deno task test           # Run all tests (68 tests)
-deno task test:coverage  # Coverage report (90.7% line, 83.1% branch)
+deno task test           # Run all tests (91 tests)
+deno task test:coverage  # Coverage report (92.8% line, 86.9% branch)
 deno task check          # Type checking
 deno task lint           # Lint
 deno task fmt            # Format
@@ -217,4 +287,4 @@ MIT
 
 ---
 
-**Last Updated**: 2026-02-28
+**Last Updated**: 2026-02-28 (v0.2.0)

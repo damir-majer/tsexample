@@ -284,6 +284,205 @@ Deno.test('run() returns an empty array when registry has no examples', async ()
 // Custom clone strategy
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Producer validation — fail fast for missing given references
+// ---------------------------------------------------------------------------
+
+Deno.test('run() throws when a given references a non-existent producer', async () => {
+  const registry = makeRegistry(
+    meta('addDollars', 'addDollars', ['nonExistent']),
+  );
+  const runner = new ExampleRunner(registry);
+
+  const suite = {
+    addDollars(_money: unknown) {
+      return 'should not run';
+    },
+  };
+
+  await assertRejects(
+    () => runner.run(suite),
+    Error,
+    'TSExample: Example "addDollars" depends on "nonExistent" which is not registered.',
+  );
+});
+
+Deno.test('run() throws for missing producer even when other examples are valid', async () => {
+  const registry = makeRegistry(
+    meta('valid', 'valid'),
+    meta('alsoValid', 'alsoValid', ['valid']),
+    meta('broken', 'broken', ['doesNotExist']),
+  );
+  const runner = new ExampleRunner(registry);
+
+  const suite = {
+    valid() {
+      return 42;
+    },
+    alsoValid(_v: unknown) {
+      return 99;
+    },
+    broken(_v: unknown) {
+      return 'should not run';
+    },
+  };
+
+  await assertRejects(
+    () => runner.run(suite),
+    Error,
+    'TSExample: Example "broken" depends on "doesNotExist" which is not registered.',
+  );
+});
+
+Deno.test('run() accepts valid given references without error', async () => {
+  const registry = makeRegistry(
+    meta('root', 'root'),
+    meta('child', 'child', ['root']),
+    meta('grandchild', 'grandchild', ['child']),
+  );
+  const runner = new ExampleRunner(registry);
+
+  const suite = {
+    root() {
+      return 1;
+    },
+    child(v: number) {
+      return v + 1;
+    },
+    grandchild(v: number) {
+      return v + 1;
+    },
+  };
+
+  const results = await runner.run(suite);
+
+  assertEquals(results.length, 3);
+  assertEquals(results[0].status, 'passed');
+  assertEquals(results[1].status, 'passed');
+  assertEquals(results[2].status, 'passed');
+  assertEquals(results[0].value, 1);
+  assertEquals(results[1].value, 2);
+  assertEquals(results[2].value, 3);
+});
+
+// ---------------------------------------------------------------------------
+// Custom clone strategy
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Multi-producer arguments — N producers → N method arguments
+// ---------------------------------------------------------------------------
+
+Deno.test('run() passes multiple producer fixtures as separate arguments', async () => {
+  const registry = makeRegistry(
+    meta('left', 'left'),
+    meta('right', 'right'),
+    meta('merge', 'merge', ['left', 'right']),
+  );
+  const runner = new ExampleRunner(registry);
+
+  const suite = {
+    left() {
+      return { side: 'left', value: 10 };
+    },
+    right() {
+      return { side: 'right', value: 20 };
+    },
+    merge(
+      l: { side: string; value: number },
+      r: { side: string; value: number },
+    ) {
+      return { total: l.value + r.value, sources: [l.side, r.side] };
+    },
+  };
+
+  const results = await runner.run(suite);
+
+  assertEquals(results.length, 3);
+  assertEquals(results[2].status, 'passed');
+  assertEquals(results[2].value, { total: 30, sources: ['left', 'right'] });
+});
+
+Deno.test('run() skips multi-producer consumer when any producer fails', async () => {
+  const registry = makeRegistry(
+    meta('ok', 'ok'),
+    meta('fail', 'fail'),
+    meta('both', 'both', ['ok', 'fail']),
+  );
+  const runner = new ExampleRunner(registry);
+
+  const suite = {
+    ok() {
+      return 42;
+    },
+    fail() {
+      throw new Error('broken');
+    },
+    both(_a: unknown, _b: unknown) {
+      return 'should not run';
+    },
+  };
+
+  const results = await runner.run(suite);
+
+  assertEquals(results.length, 3);
+
+  // Order of independent roots (ok, fail) is not guaranteed by topoSort.
+  // Find results by checking values — 'both' is always last (depends on both).
+  const statuses = new Map(
+    results.map((r) => {
+      if (r.status === 'passed' && r.value === 42) return ['ok', r.status];
+      if (r.status === 'failed') return ['fail', r.status];
+      return ['both', r.status];
+    }),
+  );
+  assertEquals(statuses.get('ok'), 'passed');
+  assertEquals(statuses.get('fail'), 'failed');
+  assertEquals(statuses.get('both'), 'skipped');
+});
+
+Deno.test('run() clones each producer fixture independently for multi-producer', async () => {
+  let capturedLeft: unknown;
+  let capturedRight: unknown;
+  let producedLeft: unknown;
+  let producedRight: unknown;
+
+  const registry = makeRegistry(
+    meta('a', 'a'),
+    meta('b', 'b'),
+    meta('c', 'c', ['a', 'b']),
+  );
+  const runner = new ExampleRunner(registry);
+
+  const suite = {
+    a() {
+      producedLeft = { id: 'a' };
+      return producedLeft;
+    },
+    b() {
+      producedRight = { id: 'b' };
+      return producedRight;
+    },
+    c(left: unknown, right: unknown) {
+      capturedLeft = left;
+      capturedRight = right;
+      return { left, right };
+    },
+  };
+
+  await runner.run(suite);
+
+  // Values are structurally equal but not same references (cloned)
+  assertEquals(capturedLeft, { id: 'a' });
+  assertEquals(capturedRight, { id: 'b' });
+  assertEquals(capturedLeft === producedLeft, false);
+  assertEquals(capturedRight === producedRight, false);
+});
+
+// ---------------------------------------------------------------------------
+// Custom clone strategy
+// ---------------------------------------------------------------------------
+
 Deno.test('run() uses a custom CloneStrategy function when provided', async () => {
   const cloneLog: unknown[] = [];
 

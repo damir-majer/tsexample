@@ -7,6 +7,57 @@ project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.2.0] — 2026-02-28
+
+**Cycle 2 complete.** BUILD > REVIEW > SHIP in continuation session. All 4
+slices shipped (3 planned + 1 stretch). Full JExample feature parity achieved.
+
+### Added
+
+- **Slice 1 — Mermaid Dependency Graph Visualization**: `renderMermaid()` pure
+  function in `graph.ts` generates `graph TD` Mermaid syntax from example
+  metadata. Alphabetical sorting for deterministic output. 6 new tests.
+- **Slice 2 — Producer Validation at Registration Time**:
+  `@Given('nonExistent')` now throws a descriptive error
+  (`TSExample: Example "X" depends on "Y" which
+  is not registered.`) before
+  any execution starts. Fail-fast behavior. 5 new tests (3 runner + 2 adapter).
+- **Slice 3 — Clone Protocol for Class Instances**: `Cloneable<T>` interface
+  with `clone(): T` method. `isCloneable()` type guard. 3-priority clone
+  dispatch: custom strategy > `clone()` > `structuredClone`. Preserves
+  `instanceof` and prototype methods through EDD chains. 8 new tests (7 unit + 1
+  integration with Money class).
+- **Slice 4 — Multi-Producer Arguments (stretch)**: `@Given('a', 'b')` maps N
+  producers to N method arguments. Diamond dependency pattern support. Was
+  already implemented in v0.1 runner but untested. 4 new tests (3 runner + 1
+  integration with VectorExample).
+- New exports in `mod.ts`: `renderMermaid`, `isCloneable`, `Cloneable` (type)
+- New test files: `deno_adapter_test.ts`, `cloneable_suite_test.ts`,
+  `multi_producer_test.ts`
+- W-Model Review #2: `docs/3-60-9/review-2.md`
+
+### Changed
+
+- `cloneFixture()` now uses 3-priority dispatch (custom strategy > Cloneable >
+  structuredClone) instead of 2-priority (custom strategy > structuredClone)
+- Updated README with Cloneable, multi-producer, renderMermaid documentation
+
+### Removed
+
+- Unreachable dead code guard in `detectCycles()` (formerly line 148 in
+  `graph.ts`)
+
+### Metrics
+
+| Metric          | v0.1  | v0.2  | Delta |
+| --------------- | ----- | ----- | ----- |
+| Tests           | 68    | 91    | +23   |
+| Line coverage   | 90.7% | 92.8% | +2.1% |
+| Branch coverage | 83.1% | 86.9% | +3.8% |
+| Test files      | 8     | 11    | +3    |
+
+---
+
 ## [0.1.0] — 2026-02-28
 
 **Cycle 1 complete.** SHAPE > BET > BUILD > REVIEW > SHIP > COOL-DOWN in single
