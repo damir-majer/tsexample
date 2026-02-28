@@ -10,21 +10,23 @@ function meta(
   name: string,
   given: string[] = [],
   description?: string,
+  tags?: string[],
 ): ExampleMetadata {
   return {
     name,
     method: name,
     given,
     ...(description !== undefined ? { description } : {}),
+    ...(tags !== undefined ? { tags } : {}),
   };
 }
 
-function passed(value: unknown = undefined): ExampleResult {
-  return { value, status: 'passed', durationMs: 0 };
+function passed(value: unknown = undefined, durationMs = 0): ExampleResult {
+  return { value, status: 'passed', durationMs };
 }
 
-function failed(message: string): ExampleResult {
-  return { value: undefined, status: 'failed', error: new Error(message), durationMs: 0 };
+function failed(message: string, durationMs = 0): ExampleResult {
+  return { value: undefined, status: 'failed', error: new Error(message), durationMs };
 }
 
 function skipped(): ExampleResult {
@@ -131,4 +133,54 @@ Deno.test('buildReport: mismatched lengths throws', () => {
     threw = true;
   }
   assertEquals(threw, true);
+});
+
+// ---------------------------------------------------------------------------
+// buildReport() — tags
+// ---------------------------------------------------------------------------
+
+Deno.test('buildReport: tags are included in report entries', () => {
+  const examples = [meta('root', [], undefined, ['setup', 'fast'])];
+  const results = [passed()];
+  const report = buildReport('TagSuite', examples, results);
+
+  assertEquals(report.examples[0].tags, ['setup', 'fast']);
+});
+
+Deno.test('buildReport: tags are undefined when not set on metadata', () => {
+  const examples = [meta('root')];
+  const results = [passed()];
+  const report = buildReport('NoTagSuite', examples, results);
+
+  assertEquals(report.examples[0].tags, undefined);
+});
+
+// ---------------------------------------------------------------------------
+// buildReport() — durationMs
+// ---------------------------------------------------------------------------
+
+Deno.test('buildReport: durationMs is included in report entries', () => {
+  const examples = [meta('a'), meta('b', ['a'])];
+  const results = [passed(undefined, 1.5), passed(undefined, 2.3)];
+  const report = buildReport('DurationSuite', examples, results);
+
+  assertEquals(report.examples[0].durationMs, 1.5);
+  assertEquals(report.examples[1].durationMs, 2.3);
+});
+
+Deno.test('buildReport: summary durationMs is sum of all examples', () => {
+  const examples = [meta('a'), meta('b'), meta('c')];
+  const results = [passed(undefined, 1.0), passed(undefined, 2.0), passed(undefined, 3.0)];
+  const report = buildReport('SumSuite', examples, results);
+
+  assertEquals(report.summary.durationMs, 6.0);
+});
+
+Deno.test('buildReport: skipped examples contribute 0ms to total duration', () => {
+  const examples = [meta('a'), meta('b', ['a'])];
+  const results = [failed('boom', 1.0), skipped()];
+  const report = buildReport('SkipDurationSuite', examples, results);
+
+  assertEquals(report.summary.durationMs, 1.0);
+  assertEquals(report.examples[1].durationMs, 0);
 });
