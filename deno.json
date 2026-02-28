@@ -1,0 +1,23 @@
+{
+  "tasks": {
+    "test": "deno test --allow-read --allow-env",
+    "test:coverage": "deno test --allow-read --allow-env --coverage=coverage",
+    "check": "deno check src/**/*.ts",
+    "fmt": "deno fmt",
+    "fmt:check": "deno fmt --check",
+    "lint": "deno lint"
+  },
+  "compilerOptions": {
+    "strict": true,
+    "experimentalDecorators": false
+  },
+  "fmt": {
+    "indentWidth": 2,
+    "singleQuote": true
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"]
+    }
+  }
+}
