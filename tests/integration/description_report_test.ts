@@ -12,6 +12,7 @@ import {
   ExampleRunner,
   getGlobalRegistry,
   Given,
+  renderMarkdown,
   resetGlobalRegistry,
 } from '../../src/mod.ts';
 import { topoSort } from '../../src/core/graph.ts';
@@ -123,4 +124,82 @@ Deno.test('report captures failure and skip cascade with descriptions', async ()
   const downstreamEntry = report.examples.find((e) => e.name === 'downstream')!;
   assertEquals(downstreamEntry.status, 'skipped');
   assertEquals(downstreamEntry.description, 'This should be skipped');
+});
+
+Deno.test('integration: tags + timing + markdown report pipeline', async () => {
+  resetGlobalRegistry();
+
+  class TaggedSuite {
+    @Example({ description: 'Empty wallet', tags: ['setup'] })
+    empty(): { amount: number; currency: string } {
+      const money = { amount: 0, currency: 'CHF' };
+      assertEquals(money.amount, 0);
+      return money;
+    }
+
+    @Example({ tags: ['mutation'] })
+    @Given('empty')
+    addDollars(money: { amount: number; currency: string }): {
+      amount: number;
+      currency: string;
+    } {
+      const result = { amount: money.amount + 10, currency: 'USD' };
+      assertEquals(result.amount, 10);
+      return result;
+    }
+
+    @Example({ description: 'Convert to EUR', tags: ['mutation', 'fx'] })
+    @Given('addDollars')
+    convert(money: { amount: number; currency: string }): {
+      amount: number;
+      currency: string;
+    } {
+      const result = {
+        amount: Math.round(money.amount * 0.92),
+        currency: 'EUR',
+      };
+      assertEquals(result.currency, 'EUR');
+      return result;
+    }
+  }
+
+  const suite = new TaggedSuite();
+
+  const registry = getGlobalRegistry();
+  const runner = new ExampleRunner(registry);
+  const results = await runner.run(suite);
+
+  // All pass
+  assertEquals(results.length, 3);
+  for (const r of results) {
+    assertEquals(r.status, 'passed');
+    assertEquals(typeof r.durationMs, 'number');
+    assertEquals(r.durationMs >= 0, true);
+  }
+
+  // Build report
+  const report = buildReport('TaggedSuite', registry.all(), results);
+
+  // Tags present in report
+  assertEquals(report.examples[0].tags, ['setup']);
+  assertEquals(report.examples[1].tags, ['mutation']);
+  assertEquals(report.examples[2].tags, ['mutation', 'fx']);
+
+  // Duration present
+  assertEquals(report.summary.durationMs >= 0, true);
+
+  // Descriptions present
+  assertEquals(report.examples[0].description, 'Empty wallet');
+  assertEquals(report.examples[2].description, 'Convert to EUR');
+
+  // Markdown renders without error and includes key content
+  const md = renderMarkdown(report);
+  assertEquals(md.includes('# TaggedSuite'), true);
+  assertEquals(md.includes('3 examples: 3 passed'), true);
+  assertEquals(md.includes('| Tags |'), true);
+  assertEquals(md.includes('| Description |'), true);
+  assertEquals(md.includes('`setup`'), true);
+  assertEquals(md.includes('`fx`'), true);
+  assertEquals(md.includes('Empty wallet'), true);
+  assertEquals(md.includes('```mermaid'), true);
 });
