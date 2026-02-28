@@ -7,7 +7,10 @@ project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [Unreleased]
+## [0.1.0] — 2026-02-28
+
+**Cycle 1 complete.** SHAPE > BET > BUILD > REVIEW > SHIP > COOL-DOWN in single
+session (~3 hours). SMART: 8/8 objectives met, 2 exceeded.
 
 ### Added
 
