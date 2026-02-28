@@ -4,7 +4,8 @@
 
 ## Context
 
-- **Project**: tsexample — Example-Driven Development framework for TypeScript/Deno
+- **Project**: tsexample — Example-Driven Development framework for
+  TypeScript/Deno
 - **Phase**: SHAPE (research, breadboarding, vertical slice identification)
 - **Duration**: 1-2 hours
 - **Rhythm**: Probe → Decide → Simplify
@@ -38,6 +39,7 @@
 ## Output Files
 
 Create in `docs/pitches/`:
+
 - `tsexample-v1-mini-pitch.md` (Tier 2 format: 1-2 pages)
 - `tsexample-breadboard.txt` (ASCII breadboard)
 - `rabbit-holes.md` (risks & assumptions)

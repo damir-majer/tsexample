@@ -40,12 +40,12 @@ Create in `docs/retrospectives/cycle-1.md`:
 
 Evaluate against original SHAPE objectives:
 
-| Objective | Status | Evidence |
-|-----------|--------|----------|
-| Core decorator API | ✓/✗ | Tests pass, examples work |
-| Test runner integration | ✓/✗ | Deno.test() registration working |
-| Documentation | ✓/✗ | README + API docs complete |
-| 50% coverage (Explore) | ✓/✗ | `deno task test:coverage` result |
+| Objective               | Status | Evidence                         |
+| ----------------------- | ------ | -------------------------------- |
+| Core decorator API      | ✓/✗    | Tests pass, examples work        |
+| Test runner integration | ✓/✗    | Deno.test() registration working |
+| Documentation           | ✓/✗    | README + API docs complete       |
+| 50% coverage (Explore)  | ✓/✗    | `deno task test:coverage` result |
 
 ## Context Hygiene
 

@@ -15,16 +15,19 @@
 Create in `docs/3-60-9/ship-1.md`:
 
 **3-Sentence Summary:**
+
 - What is tsexample?
 - What problem does it solve?
 - Who should use it?
 
 **60-Second Explainer:**
+
 - Core API overview
 - Installation & quick start
 - Example usage (copy-paste ready)
 
 **9-Minute Deep Dive:**
+
 - Architecture (FCIS structure)
 - Why Deno?
 - Advanced patterns (if any)
@@ -67,7 +70,8 @@ Create/update `README.md` in project root:
 
 ## Gate
 
-> All documentation complete and deployment checklist verified before merge to main.
+> All documentation complete and deployment checklist verified before merge to
+> main.
 
 ## Next
 

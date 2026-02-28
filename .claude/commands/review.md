@@ -26,16 +26,23 @@ deno task test:coverage  # Coverage metrics
 
 ### Core Lenses (All Projects)
 
-- [ ] **CONTEXT**: Does the solution fit the problem space? (Probe design, users, constraints)
-- [ ] **BUSINESS**: Does it deliver value? (Entry criteria met, ROI positive, clear positioning)
-- [ ] **ARCHITECTURE**: Is it composable and maintainable? (FCIS respected, dependencies clean, growth path clear)
-- [ ] **DESIGN**: Is the API intuitive? (Examples work as promised, decorators are natural)
-- [ ] **CODE QUALITY**: Is it clean and testable? (SOLID principles, minimal tech debt)
-- [ ] **SECURITY**: Are there no vulnerabilities? (No injection vectors, safe defaults)
+- [ ] **CONTEXT**: Does the solution fit the problem space? (Probe design,
+      users, constraints)
+- [ ] **BUSINESS**: Does it deliver value? (Entry criteria met, ROI positive,
+      clear positioning)
+- [ ] **ARCHITECTURE**: Is it composable and maintainable? (FCIS respected,
+      dependencies clean, growth path clear)
+- [ ] **DESIGN**: Is the API intuitive? (Examples work as promised, decorators
+      are natural)
+- [ ] **CODE QUALITY**: Is it clean and testable? (SOLID principles, minimal
+      tech debt)
+- [ ] **SECURITY**: Are there no vulnerabilities? (No injection vectors, safe
+      defaults)
 
 ### Conditional Lenses
 
-- [ ] **INFO ARCHITECTURE** ← **ACTIVATED** (this is a library/composable framework)
+- [ ] **INFO ARCHITECTURE** ← **ACTIVATED** (this is a library/composable
+      framework)
   - Public API clearly documented?
   - Examples in README or docs/?
   - Test suite serves as documentation?
@@ -47,12 +54,14 @@ For each lens, ask:
 > "Is this evidence of quality or just evidence of passing a gate?"
 
 Distinguish between:
+
 - **Passing the gate** (technical compliance)
 - **Evidence of quality** (design insight, user value, maintainability)
 
 ## Output
 
-- [ ] Create `docs/3-60-9/review-1.md` (3-part summary: What worked? What's missing? What's next?)
+- [ ] Create `docs/3-60-9/review-1.md` (3-part summary: What worked? What's
+      missing? What's next?)
 - [ ] Flag any validation gaps for post-SHIP fixes
 - [ ] Update CHANGELOG.md with review date and findings
 

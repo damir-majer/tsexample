@@ -7,7 +7,8 @@
 - **Project**: tsexample — TypeScript/Deno EDD framework
 - **Phase**: BUILD (implementation via PEP cycles)
 - **Tier 2 Cycle**: Light Cycle — 2-3 days per vertical slice
-- **3X Level**: Explore — loose quality, 50% coverage minimum, high agent autonomy
+- **3X Level**: Explore — loose quality, 50% coverage minimum, high agent
+  autonomy
 
 ## PEP Cycle Structure
 
@@ -45,11 +46,13 @@ Coverage is advisory at Explore level (not gating) but should trend upward.
 ## Example PEP Cycle
 
 **Slice 1: Core Decorator API**
+
 - Requirement: `@Example()` decorator + result model
 - Tests: 3-4 test files in tests/
 - Estimated PEPs: 2-3
 
 **Slice 2: Test Runner Integration**
+
 - Requirement: Register with Deno.test(), collect results
 - Tests: Integration tests
 - Estimated PEPs: 2-3
