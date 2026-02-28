@@ -1,6 +1,6 @@
 import { assertEquals } from 'jsr:@std/assert@^1.0.19';
 import type { ExampleMetadata, ExampleResult } from '../../src/core/types.ts';
-import { buildReport } from '../../src/core/report.ts';
+import { buildReport, renderMarkdown } from '../../src/core/report.ts';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -183,4 +183,102 @@ Deno.test('buildReport: skipped examples contribute 0ms to total duration', () =
 
   assertEquals(report.summary.durationMs, 1.0);
   assertEquals(report.examples[1].durationMs, 0);
+});
+
+// ---------------------------------------------------------------------------
+// renderMarkdown() — basic output
+// ---------------------------------------------------------------------------
+
+Deno.test('renderMarkdown: renders suite name as h1', () => {
+  const report = buildReport('MySuite', [], []);
+  const md = renderMarkdown(report);
+  assertEquals(md.startsWith('# MySuite\n'), true);
+});
+
+Deno.test('renderMarkdown: summary line shows counts and total duration', () => {
+  const examples = [meta('a'), meta('b', ['a'])];
+  const results = [passed(undefined, 1.0), passed(undefined, 2.5)];
+  const report = buildReport('S', examples, results);
+  const md = renderMarkdown(report);
+
+  assertEquals(md.includes('2 examples: 2 passed, 0 failed, 0 skipped (3.5ms)'), true);
+});
+
+Deno.test('renderMarkdown: table has correct columns without tags/descriptions', () => {
+  const examples = [meta('root')];
+  const results = [passed(42, 0.1)];
+  const report = buildReport('T', examples, results);
+  const md = renderMarkdown(report);
+
+  // Should have #, Example, Status, Duration columns but NOT Tags or Description
+  assertEquals(md.includes('| # | Example | Status | Duration |'), true);
+  assertEquals(md.includes('Tags'), false);
+  assertEquals(md.includes('Description'), false);
+});
+
+Deno.test('renderMarkdown: table includes Tags column when any example has tags', () => {
+  const examples = [
+    meta('a', [], undefined, ['fast']),
+    meta('b'),
+  ];
+  const results = [passed(undefined, 0), passed(undefined, 0)];
+  const report = buildReport('TagTable', examples, results);
+  const md = renderMarkdown(report);
+
+  assertEquals(md.includes('| Tags |'), true);
+  assertEquals(md.includes('`fast`'), true);
+});
+
+Deno.test('renderMarkdown: table includes Description column when any example has description', () => {
+  const examples = [
+    meta('a', [], 'The first example'),
+    meta('b'),
+  ];
+  const results = [passed(undefined, 0), passed(undefined, 0)];
+  const report = buildReport('DescTable', examples, results);
+  const md = renderMarkdown(report);
+
+  assertEquals(md.includes('| Description |'), true);
+  assertEquals(md.includes('The first example'), true);
+});
+
+Deno.test('renderMarkdown: includes mermaid code block with dependency graph', () => {
+  const examples = [meta('a'), meta('b', ['a'])];
+  const results = [passed(undefined, 0), passed(undefined, 0)];
+  const report = buildReport('G', examples, results);
+  const md = renderMarkdown(report);
+
+  assertEquals(md.includes('```mermaid'), true);
+  assertEquals(md.includes('graph TD'), true);
+  assertEquals(md.includes('a --> b'), true);
+  assertEquals(md.includes('```\n'), true);
+});
+
+Deno.test('renderMarkdown: failed example shows error in table', () => {
+  const examples = [meta('broken')];
+  const results = [failed('assertion failed', 1.0)];
+  const report = buildReport('F', examples, results);
+  const md = renderMarkdown(report);
+
+  assertEquals(md.includes('failed'), true);
+  assertEquals(md.includes('assertion failed'), true);
+});
+
+Deno.test('renderMarkdown: empty suite renders minimal output', () => {
+  const report = buildReport('Empty', [], []);
+  const md = renderMarkdown(report);
+
+  assertEquals(md.includes('# Empty'), true);
+  assertEquals(md.includes('0 examples'), true);
+});
+
+Deno.test('renderMarkdown: multiple tags rendered as backtick-separated list', () => {
+  const examples = [meta('a', [], undefined, ['fast', 'unit', 'core'])];
+  const results = [passed(undefined, 0)];
+  const report = buildReport('MultiTag', examples, results);
+  const md = renderMarkdown(report);
+
+  assertEquals(md.includes('`fast`'), true);
+  assertEquals(md.includes('`unit`'), true);
+  assertEquals(md.includes('`core`'), true);
 });

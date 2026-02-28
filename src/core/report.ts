@@ -80,3 +80,78 @@ export function buildReport(
     graph: renderMermaid([...examples]),
   };
 }
+
+/**
+ * Render a SuiteReport as a Markdown document.
+ *
+ * Includes: heading, summary line, example table, and Mermaid dependency graph.
+ * The Tags column is omitted if no examples have tags.
+ * The Description column is omitted if no examples have descriptions.
+ *
+ * @param report  A SuiteReport (from buildReport()).
+ * @returns       Markdown string.
+ */
+export function renderMarkdown(report: SuiteReport): string {
+  const lines: string[] = [];
+
+  // Heading
+  lines.push(`# ${report.suite}`);
+  lines.push('');
+
+  // Summary
+  const { total, passed, failed, skipped, durationMs } = report.summary;
+  lines.push(
+    `> ${total} examples: ${passed} passed, ${failed} failed, ${skipped} skipped (${formatMs(durationMs)})`,
+  );
+  lines.push('');
+
+  // Table
+  if (report.examples.length > 0) {
+    const hasTags = report.examples.some((e) => e.tags !== undefined && e.tags.length > 0);
+    const hasDescriptions = report.examples.some((e) => e.description !== undefined);
+
+    // Header row
+    const headers = ['#', 'Example', 'Status', 'Duration'];
+    if (hasTags) headers.push('Tags');
+    if (hasDescriptions) headers.push('Description');
+    lines.push(`| ${headers.join(' | ')} |`);
+    lines.push(`|${headers.map(() => '---').join('|')}|`);
+
+    // Data rows
+    for (let i = 0; i < report.examples.length; i++) {
+      const e = report.examples[i];
+      const status = e.error ? `${e.status}: ${e.error}` : e.status;
+      const cols: string[] = [
+        String(i + 1),
+        e.name,
+        status,
+        formatMs(e.durationMs),
+      ];
+      if (hasTags) {
+        cols.push(e.tags ? e.tags.map((t) => `\`${t}\``).join(' ') : '');
+      }
+      if (hasDescriptions) {
+        cols.push(e.description ?? '');
+      }
+      lines.push(`| ${cols.join(' | ')} |`);
+    }
+    lines.push('');
+  }
+
+  // Dependency graph
+  if (report.graph.trim() !== 'graph TD') {
+    lines.push('## Dependency Graph');
+    lines.push('');
+    lines.push('```mermaid');
+    lines.push(report.graph.trimEnd());
+    lines.push('```');
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
+/** Format milliseconds for display: "1.2ms" or "0.0ms". */
+function formatMs(ms: number): string {
+  return `${ms.toFixed(1)}ms`;
+}
