@@ -29,3 +29,12 @@ Thumbs.db
 node_modules/
 package-lock.json
 yarn.lock
+
+# Workflow files (local only, synced via Dropbox)
+.claude/
+CLAUDE.md
+docs/pitches/
+docs/retrospectives/
+docs/3-60-9/
+docs/plans/
+docs/NEXT-CYCLE.md
