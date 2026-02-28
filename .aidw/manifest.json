@@ -1,0 +1,10 @@
+{
+  "aidwVersion": "1.9.0",
+  "project": "tsexample",
+  "tier": 2,
+  "threeX": "expand",
+  "currentPhase": "idle",
+  "initDate": "2026-02-28",
+  "workspace": "ws-tools",
+  "repository": "https://github.com/damir-majer/tsexample.git"
+}
