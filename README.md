@@ -9,6 +9,8 @@ TypeScript ecosystem using Stage 3 decorators.
 
 **Status**: v0.4.0 (Explore)
 
+> This is a personal project. Issues and PRs are not actively monitored.
+
 ---
 
 ## Why EDD?
@@ -39,7 +41,7 @@ If addDollars fails:
 ### 1. Define a suite
 
 ```typescript
-import { Example, Given, registerSuite } from './src/mod.ts';
+import { Example, Given, registerSuite } from '@damir-majer/tsexample';
 import { assertEquals } from 'jsr:@std/assert@^1.0.19';
 
 interface Money {
@@ -165,7 +167,7 @@ Implement this interface on fixture classes to preserve prototype chains through
 the EDD dependency chain. Without it, `structuredClone` strips prototypes.
 
 ```typescript
-import type { Cloneable } from './src/mod.ts';
+import type { Cloneable } from '@damir-majer/tsexample';
 
 class Money implements Cloneable<Money> {
   constructor(public amount: number, public currency: string) {}
@@ -191,7 +193,7 @@ Generates a Mermaid `graph TD` diagram from example metadata. Useful for
 visualizing dependency chains in documentation.
 
 ```typescript
-import { ExampleRegistry, renderMermaid } from './src/mod.ts';
+import { ExampleRegistry, renderMermaid } from '@damir-majer/tsexample';
 
 const diagram = renderMermaid(registry.all());
 // "graph TD\n  empty --> addDollars\n  addDollars --> convert\n"
@@ -245,7 +247,7 @@ class VectorExample {
 For custom test harnesses or non-Deno runners:
 
 ```typescript
-import { ExampleRegistry, ExampleRunner } from './src/mod.ts';
+import { ExampleRegistry, ExampleRunner } from '@damir-majer/tsexample';
 
 const registry = new ExampleRegistry();
 registry.register({ name: 'root', method: 'root', given: [] });

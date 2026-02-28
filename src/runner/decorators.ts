@@ -63,7 +63,8 @@ const _pendingGiven = new Map<string, string[]>();
  *
  * @param producers  Names of the producer examples (must match their registered names).
  */
-export function Given(...producers: string[]) {
+// deno-lint-ignore no-explicit-any
+export function Given(...producers: string[]): (_value: (...args: any[]) => any, ctx: ClassMethodDecoratorContext) => void {
   // deno-lint-ignore no-explicit-any
   return function <T extends (...args: any[]) => any>(
     _value: T,
@@ -83,7 +84,8 @@ export function Given(...producers: string[]) {
  *
  * @param name  Optional custom example name.  Defaults to the method name.
  */
-export function Example(name?: string) {
+// deno-lint-ignore no-explicit-any
+export function Example(name?: string): (_value: (...args: any[]) => any, ctx: ClassMethodDecoratorContext) => void {
   // deno-lint-ignore no-explicit-any
   return function <T extends (...args: any[]) => any>(
     _value: T,

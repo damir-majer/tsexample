@@ -1,4 +1,21 @@
 {
+  "name": "@damir-majer/tsexample",
+  "version": "0.4.0",
+  "exports": "./src/mod.ts",
+  "publish": {
+    "exclude": [
+      "tests/",
+      "coverage/",
+      "docs/",
+      ".claude/",
+      "node_modules/",
+      "package.json",
+      "package-lock.json",
+      "vitest.config.ts",
+      "src/mod.vitest.ts",
+      "src/runner/vitest-adapter.ts"
+    ]
+  },
   "tasks": {
     "test": "deno test --allow-read --allow-env",
     "test:coverage": "deno test --allow-read --allow-env --coverage=coverage",
