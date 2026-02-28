@@ -1,6 +1,11 @@
 import { assertEquals } from 'jsr:@std/assert@^1.0.19';
 import type { ExampleMetadata } from '../../src/core/types.ts';
-import { buildGraph, detectCycles, topoSort } from '../../src/core/graph.ts';
+import {
+  buildGraph,
+  detectCycles,
+  renderMermaid,
+  topoSort,
+} from '../../src/core/graph.ts';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -123,4 +128,63 @@ Deno.test('detectCycles: self-referencing example returns cycle', () => {
   const result = detectCycles([ex('A', ['A'])]);
   assertEquals(result !== null, true);
   assertEquals(result!.includes('A'), true);
+});
+
+// ---------------------------------------------------------------------------
+// renderMermaid()
+// ---------------------------------------------------------------------------
+
+Deno.test('renderMermaid: empty input returns just the header', () => {
+  assertEquals(renderMermaid([]), 'graph TD\n');
+});
+
+Deno.test('renderMermaid: single node with no deps renders as standalone', () => {
+  const result = renderMermaid([ex('alpha')]);
+  assertEquals(result, 'graph TD\n  alpha\n');
+});
+
+Deno.test('renderMermaid: linear chain A->B->C renders correct edges', () => {
+  const result = renderMermaid([
+    ex('empty'),
+    ex('addDollars', ['empty']),
+    ex('convert', ['addDollars']),
+  ]);
+  // Edges sorted alphabetically by producer, then consumer
+  assertEquals(
+    result,
+    'graph TD\n  addDollars --> convert\n  empty --> addDollars\n',
+  );
+});
+
+Deno.test('renderMermaid: diamond pattern renders all edges', () => {
+  const result = renderMermaid([
+    ex('A'),
+    ex('B', ['A']),
+    ex('C', ['A']),
+    ex('D', ['B', 'C']),
+  ]);
+  // Edges sorted alphabetically: A->B, A->C, B->D, C->D
+  assertEquals(
+    result,
+    'graph TD\n  A --> B\n  A --> C\n  B --> D\n  C --> D\n',
+  );
+});
+
+Deno.test('renderMermaid: multiple independent roots render as standalone nodes', () => {
+  const result = renderMermaid([ex('beta'), ex('alpha'), ex('gamma')]);
+  // Alphabetical order: alpha, beta, gamma — all standalone
+  assertEquals(result, 'graph TD\n  alpha\n  beta\n  gamma\n');
+});
+
+Deno.test('renderMermaid: mix of edges and standalone nodes', () => {
+  const result = renderMermaid([
+    ex('orphan'),
+    ex('root'),
+    ex('child', ['root']),
+  ]);
+  // 'orphan' has no edges (standalone), 'root' -> 'child' is an edge
+  assertEquals(
+    result,
+    'graph TD\n  orphan\n  root --> child\n',
+  );
 });

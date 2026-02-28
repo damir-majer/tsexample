@@ -102,6 +102,51 @@ export function topoSort(examples: ExampleMetadata[]): string[] {
 }
 
 /**
+ * Render a Mermaid `graph TD` diagram from example metadata.
+ *
+ * - Edges are sorted alphabetically by producer, then by consumer.
+ * - Root nodes (no dependencies AND no consumers) appear as standalone entries.
+ * - Returns just the header line when the input is empty.
+ *
+ * @param examples  Array of example metadata.
+ * @returns         Mermaid diagram string.
+ */
+export function renderMermaid(examples: ExampleMetadata[]): string {
+  const header = 'graph TD\n';
+  if (examples.length === 0) return header;
+
+  const adjacency = buildGraph(examples);
+
+  // Compute the set of nodes that have at least one incoming edge (they are consumers).
+  const hasIncoming = new Set<string>();
+  for (const consumers of adjacency.values()) {
+    for (const consumer of consumers) {
+      hasIncoming.add(consumer);
+    }
+  }
+
+  const lines: string[] = [];
+
+  // Iterate all nodes alphabetically.
+  const sortedNodes = [...adjacency.keys()].sort();
+  for (const node of sortedNodes) {
+    const consumers = adjacency.get(node)!;
+
+    if (consumers.length === 0 && !hasIncoming.has(node)) {
+      // Root node: no dependencies, no consumers → standalone.
+      lines.push(`  ${node}`);
+    } else {
+      // Emit one edge per consumer, sorted alphabetically.
+      for (const consumer of [...consumers].sort()) {
+        lines.push(`  ${node} --> ${consumer}`);
+      }
+    }
+  }
+
+  return header + lines.join('\n') + (lines.length > 0 ? '\n' : '');
+}
+
+/**
  * Detect cycles in the dependency graph using DFS with a colouring scheme.
  *
  * Colours:
@@ -144,11 +189,6 @@ export function detectCycles(examples: ExampleMetadata[]): string[] | null {
       }
 
       if (c === 0) {
-        // Ensure the producer is tracked even if it wasn't in the input array.
-        if (!color.has(producer)) {
-          color.set(producer, 0);
-          deps.set(producer, []);
-        }
         const result = dfs(producer);
         if (result !== null) return result;
       }

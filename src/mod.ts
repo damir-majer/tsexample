@@ -7,7 +7,7 @@
  *
  * Import from core modules directly if you need the lower-level building blocks:
  *   - src/core/registry.ts  — ExampleRegistry
- *   - src/core/graph.ts     — buildGraph, topoSort, detectCycles
+ *   - src/core/graph.ts     — buildGraph, topoSort, detectCycles, renderMermaid
  *   - src/core/clone.ts     — cloneFixture
  *   - src/runner/runner.ts  — ExampleRunner
  */
@@ -30,8 +30,15 @@ export { ExampleRunner } from './runner/runner.ts';
 // Core registry (for manual test harnesses)
 export { ExampleRegistry } from './core/registry.ts';
 
+// Graph utilities
+export { renderMermaid } from './core/graph.ts';
+
+// Clone utilities
+export { isCloneable } from './core/clone.ts';
+
 // Types
 export type {
+  Cloneable,
   CloneStrategy,
   ExampleMetadata,
   ExampleResult,

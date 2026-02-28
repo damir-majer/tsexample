@@ -4,6 +4,11 @@
  * All types are pure data definitions with no logic or side effects.
  */
 
+/** Interface for fixtures that support proper cloning with prototype preservation. */
+export interface Cloneable<T = unknown> {
+  clone(): T;
+}
+
 /** Status of an example after execution. */
 export type ExampleStatus = 'passed' | 'failed' | 'skipped';
 
