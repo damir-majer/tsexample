@@ -32,7 +32,7 @@ export { ExampleRegistry } from './core/registry.ts';
 export { renderMermaid } from './core/graph.ts';
 
 // Report utilities
-export { buildReport } from './core/report.ts';
+export { buildReport, renderMarkdown } from './core/report.ts';
 
 // Clone utilities
 export { isCloneable } from './core/clone.ts';
