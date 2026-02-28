@@ -89,8 +89,10 @@ export class ExampleRunner {
   ): Promise<ExampleResult> {
     // Skip if any producer dependency failed or was itself skipped.
     if (this.#shouldSkip(exMeta)) {
-      return { value: undefined, status: 'skipped' };
+      return { value: undefined, status: 'skipped', durationMs: 0 };
     }
+
+    const start = performance.now();
 
     try {
       // Resolve and clone fixture arguments from producers.
@@ -105,13 +107,16 @@ export class ExampleRunner {
       )[exMeta.method];
 
       const value = await method.apply(suite, args);
+      const durationMs = performance.now() - start;
 
-      return { value, status: 'passed' };
+      return { value, status: 'passed', durationMs };
     } catch (error) {
+      const durationMs = performance.now() - start;
       return {
         value: undefined,
         status: 'failed',
         error: error instanceof Error ? error : new Error(String(error)),
+        durationMs,
       };
     }
   }

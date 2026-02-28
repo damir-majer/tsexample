@@ -37,6 +37,7 @@ export function buildReport(
   let passed = 0;
   let failed = 0;
   let skipped = 0;
+  let totalDuration = 0;
 
   const entries: SuiteReportEntry[] = [];
 
@@ -48,13 +49,17 @@ export function buildReport(
     else if (result.status === 'failed') failed++;
     else skipped++;
 
+    totalDuration += result.durationMs;
+
     entries.push({
       name: meta.name,
       ...(meta.description !== undefined
         ? { description: meta.description }
         : {}),
+      ...(meta.tags !== undefined ? { tags: meta.tags } : {}),
       status: result.status,
       given: meta.given,
+      durationMs: result.durationMs,
       ...(result.error !== undefined ? { error: result.error.message } : {}),
     });
   }
@@ -64,6 +69,7 @@ export function buildReport(
     passed,
     failed,
     skipped,
+    durationMs: totalDuration,
   };
 
   return {

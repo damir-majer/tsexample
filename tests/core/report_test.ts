@@ -20,15 +20,15 @@ function meta(
 }
 
 function passed(value: unknown = undefined): ExampleResult {
-  return { value, status: 'passed' };
+  return { value, status: 'passed', durationMs: 0 };
 }
 
 function failed(message: string): ExampleResult {
-  return { value: undefined, status: 'failed', error: new Error(message) };
+  return { value: undefined, status: 'failed', error: new Error(message), durationMs: 0 };
 }
 
 function skipped(): ExampleResult {
-  return { value: undefined, status: 'skipped' };
+  return { value: undefined, status: 'skipped', durationMs: 0 };
 }
 
 // ---------------------------------------------------------------------------
@@ -38,7 +38,7 @@ function skipped(): ExampleResult {
 Deno.test('buildReport: empty suite produces zero-count summary', () => {
   const report = buildReport('EmptySuite', [], []);
   assertEquals(report.suite, 'EmptySuite');
-  assertEquals(report.summary, { total: 0, passed: 0, failed: 0, skipped: 0 });
+  assertEquals(report.summary, { total: 0, passed: 0, failed: 0, skipped: 0, durationMs: 0 });
   assertEquals(report.examples, []);
   assertEquals(report.graph, 'graph TD\n');
   assertEquals(typeof report.timestamp, 'string');
@@ -49,7 +49,7 @@ Deno.test('buildReport: single passing example', () => {
   const results = [passed(42)];
   const report = buildReport('SingleSuite', examples, results);
 
-  assertEquals(report.summary, { total: 1, passed: 1, failed: 0, skipped: 0 });
+  assertEquals(report.summary, { total: 1, passed: 1, failed: 0, skipped: 0, durationMs: 0 });
   assertEquals(report.examples.length, 1);
   assertEquals(report.examples[0].name, 'root');
   assertEquals(report.examples[0].status, 'passed');
@@ -66,7 +66,7 @@ Deno.test('buildReport: mixed results compute correct summary', () => {
   const results = [passed(), failed('boom'), skipped()];
   const report = buildReport('MixedSuite', examples, results);
 
-  assertEquals(report.summary, { total: 3, passed: 1, failed: 1, skipped: 1 });
+  assertEquals(report.summary, { total: 3, passed: 1, failed: 1, skipped: 1, durationMs: 0 });
 });
 
 Deno.test('buildReport: failed example includes error message', () => {

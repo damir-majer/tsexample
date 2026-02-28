@@ -22,7 +22,7 @@ function makeResult(
   value: unknown,
   status: 'passed' | 'failed' | 'skipped' = 'passed',
 ): ExampleResult {
-  return { value, status };
+  return { value, status, durationMs: 0 };
 }
 
 // ---------------------------------------------------------------------------

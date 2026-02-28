@@ -21,6 +21,8 @@ export interface ExampleOptions {
   readonly name?: string;
   /** Human-readable description of what this example demonstrates. */
   readonly description?: string;
+  /** Tags for filtering and categorization. */
+  readonly tags?: readonly string[];
 }
 
 /** Metadata for a registered example method. */
@@ -33,6 +35,8 @@ export interface ExampleMetadata {
   readonly given: readonly string[];
   /** Human-readable description of what this example demonstrates. */
   readonly description?: string;
+  /** Tags for filtering and categorization. */
+  readonly tags?: readonly string[];
 }
 
 /** Result of executing a single example. */
@@ -43,6 +47,8 @@ export interface ExampleResult {
   readonly status: ExampleStatus;
   /** Error if the example failed. */
   readonly error?: Error;
+  /** Wall-clock execution time in milliseconds. */
+  readonly durationMs: number;
 }
 
 /** A directed edge in the example dependency graph. */
@@ -59,14 +65,18 @@ export interface SuiteReportSummary {
   readonly passed: number;
   readonly failed: number;
   readonly skipped: number;
+  /** Total wall-clock time for the suite in milliseconds. */
+  readonly durationMs: number;
 }
 
 /** One example's entry in a suite report. */
 export interface SuiteReportEntry {
   readonly name: string;
   readonly description?: string;
+  readonly tags?: readonly string[];
   readonly status: ExampleStatus;
   readonly given: readonly string[];
+  readonly durationMs: number;
   readonly error?: string;
 }
 

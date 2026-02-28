@@ -59,7 +59,11 @@ Deno.test('descriptions flow through decorator -> registry -> report', async () 
 
   // Verify structure
   assertEquals(report.suite, 'WalletExample');
-  assertEquals(report.summary, { total: 3, passed: 3, failed: 0, skipped: 0 });
+  assertEquals(report.summary.total, 3);
+  assertEquals(report.summary.passed, 3);
+  assertEquals(report.summary.failed, 0);
+  assertEquals(report.summary.skipped, 0);
+  assertEquals(report.summary.durationMs >= 0, true);
 
   // Verify descriptions
   const emptyEntry = report.examples.find((e) => e.name === 'empty')!;
@@ -105,7 +109,11 @@ Deno.test('report captures failure and skip cascade with descriptions', async ()
   const orderedMeta = order.map((name) => registry.get(name)!);
   const report = buildReport('FailChain', orderedMeta, results);
 
-  assertEquals(report.summary, { total: 2, passed: 0, failed: 1, skipped: 1 });
+  assertEquals(report.summary.total, 2);
+  assertEquals(report.summary.passed, 0);
+  assertEquals(report.summary.failed, 1);
+  assertEquals(report.summary.skipped, 1);
+  assertEquals(report.summary.durationMs >= 0, true);
 
   const breakerEntry = report.examples.find((e) => e.name === 'breaker')!;
   assertEquals(breakerEntry.status, 'failed');

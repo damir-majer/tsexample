@@ -134,12 +134,12 @@ Deno.test('formatStepName: works with empty name', () => {
 // ---------------------------------------------------------------------------
 
 Deno.test('resolveStepError: returns null for passed result', () => {
-  assertEquals(resolveStepError({ value: 42, status: 'passed' }, 'ex'), null);
+  assertEquals(resolveStepError({ value: 42, status: 'passed', durationMs: 0 }, 'ex'), null);
 });
 
 Deno.test('resolveStepError: returns null for skipped result', () => {
   assertEquals(
-    resolveStepError({ value: undefined, status: 'skipped' }, 'ex'),
+    resolveStepError({ value: undefined, status: 'skipped', durationMs: 0 }, 'ex'),
     null,
   );
 });
@@ -147,7 +147,7 @@ Deno.test('resolveStepError: returns null for skipped result', () => {
 Deno.test('resolveStepError: returns the captured error for failed result with error', () => {
   const err = new Error('boom');
   const result = resolveStepError(
-    { value: undefined, status: 'failed', error: err },
+    { value: undefined, status: 'failed', error: err, durationMs: 0 },
     'ex',
   );
   assertEquals(result, err);
@@ -155,7 +155,7 @@ Deno.test('resolveStepError: returns the captured error for failed result with e
 
 Deno.test('resolveStepError: generates a fallback error when failed result has no error', () => {
   const result = resolveStepError(
-    { value: undefined, status: 'failed' },
+    { value: undefined, status: 'failed', durationMs: 0 },
     'myEx',
   );
   assertEquals(result instanceof Error, true);
@@ -164,7 +164,7 @@ Deno.test('resolveStepError: generates a fallback error when failed result has n
 
 Deno.test('resolveStepError: fallback error message includes the example name', () => {
   const result = resolveStepError(
-    { value: undefined, status: 'failed' },
+    { value: undefined, status: 'failed', durationMs: 0 },
     'computeTotal',
   );
   assertEquals((result as Error).message, 'Example "computeTotal" failed');
