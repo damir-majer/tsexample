@@ -26,7 +26,7 @@
  */
 
 import { ExampleRegistry } from '../core/registry.ts';
-import type { ExampleMetadata } from '../core/types.ts';
+import type { ExampleMetadata, ExampleOptions } from '../core/types.ts';
 
 // ---------------------------------------------------------------------------
 // Global singleton registry
@@ -82,10 +82,16 @@ export function Given(...producers: string[]): (_value: (...args: any[]) => any,
 /**
  * Register a method as a named example in the global registry.
  *
- * @param name  Optional custom example name.  Defaults to the method name.
+ * Accepts either a custom name string or an options object:
+ *   @Example()                         — name = method name
+ *   @Example('custom')                 — name = 'custom'
+ *   @Example({ description: '...' })   — name = method name, with description
+ *   @Example({ name: 'x', description: '...' }) — both set
+ *
+ * @param nameOrOptions  Optional custom name or options object.
  */
 // deno-lint-ignore no-explicit-any
-export function Example(name?: string): (_value: (...args: any[]) => any, ctx: ClassMethodDecoratorContext) => void {
+export function Example(nameOrOptions?: string | ExampleOptions): (_value: (...args: any[]) => any, ctx: ClassMethodDecoratorContext) => void {
   // deno-lint-ignore no-explicit-any
   return function <T extends (...args: any[]) => any>(
     _value: T,
@@ -93,15 +99,24 @@ export function Example(name?: string): (_value: (...args: any[]) => any, ctx: C
   ): void {
     const methodName = String(ctx.name);
 
+    // Normalize: string -> { name }, object -> as-is, undefined -> {}
+    const opts: ExampleOptions =
+      typeof nameOrOptions === 'string'
+        ? { name: nameOrOptions }
+        : nameOrOptions ?? {};
+
     ctx.addInitializer(function () {
       // Drain any @Given metadata recorded for this method.
       const given = _pendingGiven.get(methodName) ?? [];
       _pendingGiven.delete(methodName);
 
       const meta: ExampleMetadata = {
-        name: name ?? methodName,
+        name: opts.name ?? methodName,
         method: methodName,
         given,
+        ...(opts.description !== undefined
+          ? { description: opts.description }
+          : {}),
       };
 
       _globalRegistry.register(meta);

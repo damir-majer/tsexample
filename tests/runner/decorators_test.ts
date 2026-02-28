@@ -267,3 +267,78 @@ Deno.test('constructing two instances of the same class registers examples twice
     'already registered',
   );
 });
+
+// ---------------------------------------------------------------------------
+// @Example() — options object overload
+// ---------------------------------------------------------------------------
+
+Deno.test('@Example({ description }) sets description on metadata', () => {
+  reset();
+
+  class Suite {
+    @Example({ description: 'An empty wallet with zero balance' })
+    empty() {
+      return { amount: 0 };
+    }
+  }
+
+  new Suite();
+
+  const meta = getGlobalRegistry().get('empty');
+  assertEquals(meta?.name, 'empty');
+  assertEquals(meta?.description, 'An empty wallet with zero balance');
+  assertEquals(meta?.given, []);
+});
+
+Deno.test('@Example({ name, description }) sets both name and description', () => {
+  reset();
+
+  class Suite {
+    @Example({ name: 'zeroBalance', description: 'Wallet starts at zero' })
+    empty() {
+      return { amount: 0 };
+    }
+  }
+
+  new Suite();
+
+  const meta = getGlobalRegistry().get('zeroBalance');
+  assertEquals(meta?.name, 'zeroBalance');
+  assertEquals(meta?.method, 'empty');
+  assertEquals(meta?.description, 'Wallet starts at zero');
+});
+
+Deno.test('@Example({}) with empty options uses method name, no description', () => {
+  reset();
+
+  class Suite {
+    @Example({})
+    myMethod() {
+      return 1;
+    }
+  }
+
+  new Suite();
+
+  const meta = getGlobalRegistry().get('myMethod');
+  assertEquals(meta?.name, 'myMethod');
+  assertEquals(meta?.description, undefined);
+});
+
+Deno.test('@Example({ name: "custom" }) without description sets name only', () => {
+  reset();
+
+  class Suite {
+    @Example({ name: 'custom' })
+    myMethod() {
+      return 1;
+    }
+  }
+
+  new Suite();
+
+  const meta = getGlobalRegistry().get('custom');
+  assertEquals(meta?.name, 'custom');
+  assertEquals(meta?.method, 'myMethod');
+  assertEquals(meta?.description, undefined);
+});
