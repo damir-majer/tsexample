@@ -7,6 +7,19 @@ project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## v0.5.0 (2026-02-28)
+
+- **Example descriptions**: `@Example()` accepts an options object with optional
+  `description` field. Backwards-compatible — `@Example()`, `@Example('name')`,
+  and `@Example({ name, description })` all work.
+- **Suite reports**: New `buildReport()` pure function produces structured
+  `SuiteReport` JSON from metadata + results. Includes summary counts,
+  per-example entries with descriptions, and a Mermaid dependency graph.
+- New types: `ExampleOptions`, `SuiteReport`, `SuiteReportEntry`,
+  `SuiteReportSummary`.
+
+---
+
 ## [0.4.0] — 2026-02-28
 
 **Cycle 4 complete.** Vitest adapter graduation. The spike

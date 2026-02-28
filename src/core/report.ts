@@ -55,9 +55,7 @@ export function buildReport(
         : {}),
       status: result.status,
       given: meta.given,
-      ...(result.error !== undefined
-        ? { error: result.error.message }
-        : {}),
+      ...(result.error !== undefined ? { error: result.error.message } : {}),
     });
   }
 

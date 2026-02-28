@@ -63,8 +63,10 @@ const _pendingGiven = new Map<string, string[]>();
  *
  * @param producers  Names of the producer examples (must match their registered names).
  */
-// deno-lint-ignore no-explicit-any
-export function Given(...producers: string[]): (_value: (...args: any[]) => any, ctx: ClassMethodDecoratorContext) => void {
+export function Given(
+  ...producers: string[]
+  // deno-lint-ignore no-explicit-any
+): (_value: (...args: any[]) => any, ctx: ClassMethodDecoratorContext) => void {
   // deno-lint-ignore no-explicit-any
   return function <T extends (...args: any[]) => any>(
     _value: T,
@@ -90,8 +92,10 @@ export function Given(...producers: string[]): (_value: (...args: any[]) => any,
  *
  * @param nameOrOptions  Optional custom name or options object.
  */
-// deno-lint-ignore no-explicit-any
-export function Example(nameOrOptions?: string | ExampleOptions): (_value: (...args: any[]) => any, ctx: ClassMethodDecoratorContext) => void {
+export function Example(
+  nameOrOptions?: string | ExampleOptions,
+  // deno-lint-ignore no-explicit-any
+): (_value: (...args: any[]) => any, ctx: ClassMethodDecoratorContext) => void {
   // deno-lint-ignore no-explicit-any
   return function <T extends (...args: any[]) => any>(
     _value: T,
@@ -100,10 +104,9 @@ export function Example(nameOrOptions?: string | ExampleOptions): (_value: (...a
     const methodName = String(ctx.name);
 
     // Normalize: string -> { name }, object -> as-is, undefined -> {}
-    const opts: ExampleOptions =
-      typeof nameOrOptions === 'string'
-        ? { name: nameOrOptions }
-        : nameOrOptions ?? {};
+    const opts: ExampleOptions = typeof nameOrOptions === 'string'
+      ? { name: nameOrOptions }
+      : nameOrOptions ?? {};
 
     ctx.addInitializer(function () {
       // Drain any @Given metadata recorded for this method.

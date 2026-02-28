@@ -1,8 +1,5 @@
 import { assertEquals } from 'jsr:@std/assert@^1.0.19';
-import type {
-  ExampleMetadata,
-  ExampleResult,
-} from '../../src/core/types.ts';
+import type { ExampleMetadata, ExampleResult } from '../../src/core/types.ts';
 import { buildReport } from '../../src/core/report.ts';
 
 // ---------------------------------------------------------------------------
@@ -14,7 +11,12 @@ function meta(
   given: string[] = [],
   description?: string,
 ): ExampleMetadata {
-  return { name, method: name, given, ...(description !== undefined ? { description } : {}) };
+  return {
+    name,
+    method: name,
+    given,
+    ...(description !== undefined ? { description } : {}),
+  };
 }
 
 function passed(value: unknown = undefined): ExampleResult {

@@ -7,7 +7,7 @@ Inspired by [JExample](https://scg.unibe.ch/research/jexample) research from the
 University of Bern, TSExample brings declarative test dependency chains to the
 TypeScript ecosystem using Stage 3 decorators.
 
-**Status**: v0.4.0 (Explore)
+**Status**: v0.5.0 (Explore)
 
 > This is a personal project. Issues and PRs are not actively monitored.
 
@@ -50,7 +50,7 @@ interface Money {
 }
 
 class MoneyExample {
-  @Example()
+  @Example({ description: 'Empty wallet with zero balance' })
   empty(): Money {
     const money: Money = { amount: 0, currency: 'CHF' };
     assertEquals(money.amount, 0);
@@ -134,13 +134,24 @@ The API is identical — only the import path differs. The Vitest adapter maps
 
 ### Decorators
 
-#### `@Example(name?: string)`
+#### `@Example(nameOrOptions?: string | ExampleOptions)`
 
 Marks a method as an example. The method's return value becomes a **fixture**
 that downstream consumers can depend on.
 
-- `name` — Optional custom name. Defaults to the method name.
+- `nameOrOptions` — Optional. Either:
+  - A `string` for a custom name (defaults to method name)
+  - An `ExampleOptions` object: `{ name?: string, description?: string }`
 - Place `@Example()` above `@Given()` when combining both.
+
+All of these work:
+
+```typescript
+@Example()                                     // name = method name
+@Example('custom')                             // name = 'custom'
+@Example({ description: 'Empty wallet' })      // name = method name, with description
+@Example({ name: 'x', description: '...' })   // both set
+```
 
 #### `@Given(...producers: string[])`
 
@@ -199,16 +210,38 @@ const diagram = renderMermaid(registry.all());
 // "graph TD\n  empty --> addDollars\n  addDollars --> convert\n"
 ```
 
+#### `buildReport(suite: string, examples: ExampleMetadata[], results: ExampleResult[]): SuiteReport`
+
+Builds a structured report from suite execution results. Returns a `SuiteReport`
+with summary counts, per-example entries (including descriptions), and a Mermaid
+dependency graph.
+
+```typescript
+import {
+  buildReport,
+  ExampleRegistry,
+  ExampleRunner,
+} from '@damir-majer/tsexample';
+
+// After running examples:
+const report = buildReport('MoneyExample', metadata, results);
+console.log(JSON.stringify(report, null, 2));
+```
+
 ### Types
 
-| Type              | Description                                                   |
-| ----------------- | ------------------------------------------------------------- |
-| `ExampleMetadata` | `{ name, method, given }` — metadata for a registered example |
-| `ExampleResult`   | `{ value, status, error? }` — result after execution          |
-| `ExampleStatus`   | `'passed' \| 'failed' \| 'skipped'`                           |
-| `CloneStrategy`   | `'structured' \| ((value: unknown) => unknown)`               |
-| `DependencyEdge`  | `{ from, to }` — edge in the dependency graph                 |
-| `Cloneable<T>`    | `{ clone(): T }` — implement for prototype-preserving clones  |
+| Type                 | Description                                                    |
+| -------------------- | -------------------------------------------------------------- |
+| `ExampleMetadata`    | `{ name, method, given }` — metadata for a registered example  |
+| `ExampleResult`      | `{ value, status, error? }` — result after execution           |
+| `ExampleStatus`      | `'passed' \| 'failed' \| 'skipped'`                            |
+| `CloneStrategy`      | `'structured' \| ((value: unknown) => unknown)`                |
+| `DependencyEdge`     | `{ from, to }` — edge in the dependency graph                  |
+| `Cloneable<T>`       | `{ clone(): T }` — implement for prototype-preserving clones   |
+| `ExampleOptions`     | `{ name?, description? }` — options for `@Example()` decorator |
+| `SuiteReport`        | `{ suite, timestamp, summary, examples, graph }` — full report |
+| `SuiteReportEntry`   | `{ name, description?, status, given, error? }` — one example  |
+| `SuiteReportSummary` | `{ total, passed, failed, skipped }` — summary counts          |
 
 ### Multi-Producer Arguments
 
@@ -265,10 +298,11 @@ TSExample follows the **FCIS pattern** (Functional Core, Imperative Shell):
 ```
 src/
   core/                   # Functional Core (pure, no I/O)
-    types.ts              # ExampleMetadata, ExampleResult, CloneStrategy, Cloneable
+    types.ts              # ExampleMetadata, ExampleResult, CloneStrategy, Cloneable, ExampleOptions, SuiteReport
     registry.ts           # ExampleRegistry — in-memory store
     graph.ts              # buildGraph, topoSort, detectCycles, renderMermaid
     clone.ts              # cloneFixture, isClassInstance, isCloneable
+    report.ts             # buildReport — structured suite report builder
   runner/                 # Imperative Shell (runtime integration)
     decorators.ts         # @Example(), @Given() — Stage 3 decorators
     runner.ts             # ExampleRunner — orchestrates execution
@@ -286,7 +320,7 @@ shared.
 
 ---
 
-## Known Limitations (v0.4)
+## Known Limitations (v0.5)
 
 - **Single-class suites**: Dependencies cannot span across different suite
   classes.
@@ -298,7 +332,7 @@ shared.
 ## Development
 
 ```bash
-deno task test           # Run Deno tests (100 tests)
+deno task test           # Run Deno tests (116 tests)
 deno task test:vitest    # Run Vitest tests (13 tests)
 deno task test:all       # Run both Deno + Vitest tests
 deno task test:coverage  # Deno coverage report
@@ -327,4 +361,4 @@ MIT
 
 ---
 
-**Last Updated**: 2026-02-28 (v0.4.0)
+**Last Updated**: 2026-02-28 (v0.5.0)

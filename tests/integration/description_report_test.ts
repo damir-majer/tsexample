@@ -6,13 +6,13 @@
  */
 import { assertEquals } from 'jsr:@std/assert@^1.0.19';
 import {
-  Example,
-  Given,
-  getGlobalRegistry,
-  resetGlobalRegistry,
-  ExampleRunner,
-  ExampleRegistry,
   buildReport,
+  Example,
+  ExampleRegistry,
+  ExampleRunner,
+  getGlobalRegistry,
+  Given,
+  resetGlobalRegistry,
 } from '../../src/mod.ts';
 import { topoSort } from '../../src/core/graph.ts';
 
