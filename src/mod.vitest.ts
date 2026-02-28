@@ -31,6 +31,9 @@ export { ExampleRegistry } from './core/registry.ts';
 // Graph utilities
 export { renderMermaid } from './core/graph.ts';
 
+// Report utilities
+export { buildReport } from './core/report.ts';
+
 // Clone utilities
 export { isCloneable } from './core/clone.ts';
 
@@ -39,6 +42,10 @@ export type {
   Cloneable,
   CloneStrategy,
   ExampleMetadata,
+  ExampleOptions,
   ExampleResult,
   ExampleStatus,
+  SuiteReport,
+  SuiteReportEntry,
+  SuiteReportSummary,
 } from './core/types.ts';
