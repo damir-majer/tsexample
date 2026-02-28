@@ -29,7 +29,44 @@ import { getGlobalRegistry, resetGlobalRegistry } from './decorators.ts';
 import { ExampleRegistry } from '../core/registry.ts';
 import { ExampleRunner } from './runner.ts';
 import { topoSort } from '../core/graph.ts';
-import type { CloneStrategy } from '../core/types.ts';
+import type { CloneStrategy, ExampleResult } from '../core/types.ts';
+
+// ---------------------------------------------------------------------------
+// Pure helpers — no I/O, no Deno.test. Exported for unit testing.
+// ---------------------------------------------------------------------------
+
+/**
+ * Format the Deno step name for an example.
+ *
+ * Skipped examples are prefixed with "[SKIPPED]" so their status is
+ * self-documenting in test output (Deno has no native skip-step API).
+ *
+ * @param name    The example name (from topological order).
+ * @param skipped Whether the example was skipped.
+ * @returns       The display name for the Deno sub-step.
+ */
+export function formatStepName(name: string, skipped: boolean): string {
+  return skipped ? `[SKIPPED] ${name}` : name;
+}
+
+/**
+ * Resolve the error that a Deno step should throw, if any.
+ *
+ * Returns null for passed or skipped results (step body is a no-op).
+ * Returns the captured Error for failed results, falling back to a
+ * generic Error if the failure carried no error object.
+ *
+ * @param result  The ExampleResult from the runner.
+ * @param name    The example name, used in the fallback error message.
+ * @returns       An Error to throw inside the step, or null.
+ */
+export function resolveStepError(
+  result: ExampleResult,
+  name: string,
+): Error | null {
+  if (result.status !== 'failed') return null;
+  return result.error ?? new Error(`Example "${name}" failed`);
+}
 
 /** Options accepted by registerSuite(). */
 export interface RegisterSuiteOptions {
@@ -77,20 +114,12 @@ export function registerSuite(
       const name = order[i];
       const result = results[i];
 
-      if (result.status === 'skipped') {
-        // Deno.TestContext has no native skip-step API (as of Deno 1.x/2.x).
-        // Convention: prefix with [SKIPPED] so the output is self-documenting.
-        await t.step(`[SKIPPED] ${name}`, () => {
-          // no-op — step passes but name signals it was skipped
-        });
-      } else {
-        await t.step(name, () => {
-          if (result.status === 'failed') {
-            throw result.error ?? new Error(`Example "${name}" failed`);
-          }
-          // 'passed' — no action needed
-        });
-      }
+      const stepName = formatStepName(name, result.status === 'skipped');
+      const stepError = resolveStepError(result, name);
+      await t.step(stepName, () => {
+        if (stepError !== null) throw stepError;
+        // 'passed' or 'skipped' — no-op
+      });
     }
   });
 }

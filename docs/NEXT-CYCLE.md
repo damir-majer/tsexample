@@ -102,9 +102,9 @@ via direct GitHub import or Deno workspace is sufficient.
 
 ## Tech Debt to Address
 
-| Item                                    | Severity   | Slice to Fix In           |
-| --------------------------------------- | ---------- | ------------------------- |
-| deno-adapter.ts 40% branch coverage     | Low        | Slice 2 (primary target)  |
-| Decision records missing (3 cycles!)    | Low        | Slice 1 (dedicated)       |
-| `no-explicit-any` in decorators.ts (2x) | Acceptable | Only if TS improves       |
-| README: no rendered Mermaid diagram     | Trivial    | Any slice (quick add)     |
+| Item                                    | Severity   | Slice to Fix In          |
+| --------------------------------------- | ---------- | ------------------------ |
+| deno-adapter.ts 40% branch coverage     | Low        | Slice 2 (primary target) |
+| Decision records missing (3 cycles!)    | Low        | Slice 1 (dedicated)      |
+| `no-explicit-any` in decorators.ts (2x) | Acceptable | Only if TS improves      |
+| README: no rendered Mermaid diagram     | Trivial    | Any slice (quick add)    |

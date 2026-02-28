@@ -7,6 +7,42 @@ project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.3.0] — 2026-02-28
+
+**Cycle 3 complete.** Housekeeping + hardening cycle. Decision records close 3
+cycles of deferred documentation debt. Adapter test extraction doubles branch
+coverage on the longest-standing tech debt item.
+
+### Added
+
+- **Slice 1 — Decision Records**: 4 ADR files in `docs/decisions/` documenting
+  key architecture decisions from Cycles 1-2:
+  - DEC-001: Stage 3 decorator timing (`addInitializer` at construction)
+  - DEC-002: Cloneable interface (structuredClone prototype loss)
+  - DEC-003: Single Deno.test per suite (topological ordering control)
+  - DEC-004: 3-priority clone dispatch (custom > Cloneable > structuredClone)
+- **Slice 2 — deno-adapter.ts Unit Tests**: Extracted 2 pure helper functions
+  (`formatStepName`, `resolveStepError`) from imperative shell. 9 new unit
+  tests. Branch coverage 40% → 80%.
+- W-Model Review #3: `docs/3-60-9/review-3.md`
+
+### Changed
+
+- `deno-adapter.ts` refactored: step-name formatting and error resolution
+  extracted into exported pure helpers (FCIS compliance)
+- NEXT-CYCLE.md: removed JSR publication (private library, JSR requires public)
+
+### Metrics
+
+| Metric          | v0.2  | v0.3  | Delta  |
+| --------------- | ----- | ----- | ------ |
+| Tests           | 91    | 100   | +9     |
+| Line coverage   | 92.8% | 94.9% | +2.1%  |
+| Branch coverage | 86.9% | 88.5% | +1.6%  |
+| deno-adapter.ts | 40%   | 80%   | +40 pp |
+
+---
+
 ## [0.2.0] — 2026-02-28
 
 **Cycle 2 complete.** BUILD > REVIEW > SHIP in continuation session. All 4
