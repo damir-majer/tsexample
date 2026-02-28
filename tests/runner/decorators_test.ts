@@ -342,3 +342,74 @@ Deno.test('@Example({ name: "custom" }) without description sets name only', () 
   assertEquals(meta?.method, 'myMethod');
   assertEquals(meta?.description, undefined);
 });
+
+// ---------------------------------------------------------------------------
+// @Example() — tags option
+// ---------------------------------------------------------------------------
+
+Deno.test('@Example({ tags }) sets tags on metadata', () => {
+  reset();
+
+  class Suite {
+    @Example({ tags: ['setup', 'fast'] })
+    root() {
+      return 1;
+    }
+  }
+
+  new Suite();
+
+  const meta = getGlobalRegistry().get('root');
+  assertEquals(meta?.tags, ['setup', 'fast']);
+});
+
+Deno.test('@Example({ name, description, tags }) sets all fields', () => {
+  reset();
+
+  class Suite {
+    @Example({ name: 'init', description: 'Initial state', tags: ['core'] })
+    myMethod() {
+      return 0;
+    }
+  }
+
+  new Suite();
+
+  const meta = getGlobalRegistry().get('init');
+  assertEquals(meta?.name, 'init');
+  assertEquals(meta?.method, 'myMethod');
+  assertEquals(meta?.description, 'Initial state');
+  assertEquals(meta?.tags, ['core']);
+});
+
+Deno.test('@Example() without tags leaves tags undefined', () => {
+  reset();
+
+  class Suite {
+    @Example()
+    simple() {
+      return 1;
+    }
+  }
+
+  new Suite();
+
+  const meta = getGlobalRegistry().get('simple');
+  assertEquals(meta?.tags, undefined);
+});
+
+Deno.test('@Example("name") string overload leaves tags undefined', () => {
+  reset();
+
+  class Suite {
+    @Example('named')
+    myMethod() {
+      return 1;
+    }
+  }
+
+  new Suite();
+
+  const meta = getGlobalRegistry().get('named');
+  assertEquals(meta?.tags, undefined);
+});
